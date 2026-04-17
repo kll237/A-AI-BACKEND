@@ -1,0 +1,716 @@
+﻿from fastapi import APIRouter, HTTPException, Form, Depends, Query, Body
+from typing import List, Optional
+from datetime import datetime
+import json
+
+from app.models.camera import Camera, CameraCreate, CameraResponse, FilterConfig
+from app.services.camera_service import CameraService
+from app.utils.stream_validator import StreamValidator
+
+router = APIRouter()
+camera_service = CameraService()
+stream_validator = StreamValidator()
+
+
+@router.post("/", response_model=CameraResponse, summary="创建摄像头")
+async def create_camera(
+    name: str = Form(..., description="摄像头名称，必填项"),
+    rtsp_url: str = Form(..., description="RTSP视频流地址，必填项"),
+    verify_stream: bool = Form(True, description="是否验证RTSP流，默认true")
+):
+    """
+    ## 📹 创建摄像头
+    
+    添加新的摄像头到监控系统。
+    
+    ### 📋 功能说明：
+    - 添加新的摄像头设备
+    - 可选验证RTSP流是否可访问
+    - 配置摄像头基本信息
+    
+    ### 📝 参数说明：
+    - **name** (必填): 摄像头名称，用于识别
+    - **rtsp_url** (必填): RTSP视频流地址
+      - 格式: rtsp://用户名:密码@IP地址:端口/路径
+      - 示例: rtsp://admin:password@192.168.1.100:554/stream1
+    - **verify_stream** (可选): 是否验证RTSP流
+      - true: 验证流可访问后再添加（推荐）
+      - false: 直接添加不验证
+    
+    ### ✅ 返回信息：
+    - 摄像头创建成功的确认信息
+    - 摄像头ID和详细信息
+    - 流验证结果（如验证）
+    
+    ### ⚠️ 注意事项：
+    - RTSP地址需要包含认证信息（如果摄像头需要登录）
+    - 建议启用流验证以确保摄像头正常工作
+    - 确保网络能够访问摄像头IP地址
+    """
+    try:
+        # Create camera data object with validation results
+        camera_data = CameraCreate(
+            name=name,
+            rtsp_url=rtsp_url,
+            created_at=datetime.now().isoformat()
+        )
+
+        # Validate the stream if requested
+        validation_result = None
+        if verify_stream:  # Use the new parameter name
+            validation_result = StreamValidator.validate_rtsp_stream(rtsp_url)
+
+            if not validation_result["is_valid"]:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"RTSP流验证失败: {validation_result['message']}"
+                )
+
+            # Save camera with validation data
+            camera = camera_service.create_or_update_camera(
+                camera_data,
+                validation_result=validation_result
+            )
+        else:
+            # Save camera without validation
+            camera = camera_service.create_or_update_camera(camera_data)
+
+        # Prepare success message
+        message = "摄像头添加成功"
+        if verify_stream:  # Use the new parameter name
+            message += " (已验证视频流)"
+
+        return CameraResponse(
+            id=camera.id,
+            name=camera.name,
+            rtsp_url=camera.rtsp_url,
+            message=message
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"创建摄像头时出错: {str(e)}")
+
+
+@router.post("/validate", response_model=dict, summary="验证RTSP流")
+async def validate_stream(
+    rtsp_url: str = Form(..., description="RTSP视频流地址，必填项"),
+    timeout: int = Form(5, description="超时时间（秒），默认5秒")
+):
+    """
+    ## 🔍 验证RTSP视频流
+    
+    测试RTSP流地址是否可访问和正常工作。
+    
+    ### 📋 功能说明：
+    - 验证RTSP流地址格式是否正确
+    - 测试摄像头连接是否正常
+    - 检查视频流是否可播放
+    
+    ### 📝 参数说明：
+    - **rtsp_url** (必填): RTSP视频流地址
+      - 格式: rtsp://用户名:密码@IP地址:端口/路径
+      - 示例: rtsp://admin:password@192.168.1.100:554/stream1
+    - **timeout** (可选): 连接超时时间（秒）
+      - 默认: 5秒
+      - 范围: 1-30秒
+    
+    ### ✅ 返回信息：
+    - 流验证结果（成功/失败）
+    - 验证详细信息和错误原因
+    - 连接延迟和性能数据
+    - 视频分辨率信息
+    
+    ### ⚠️ 注意事项：
+    - 需要正确的摄像头登录凭证
+    - 确保网络连接正常
+    - 摄像头需在线并支持RTSP协议
+    """
+    try:
+        validation_result = StreamValidator.validate_rtsp_stream(rtsp_url, timeout)
+
+        return {
+            "rtsp_url": rtsp_url,
+            "验证状态": "成功" if validation_result["is_valid"] else "失败",
+            "消息": validation_result["message"],
+            "详细信息": {
+                "视频宽度": validation_result["frame_width"],
+                "视频高度": validation_result["frame_height"],
+                "响应时间": f"{validation_result['response_time']}秒"
+            }
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"验证视频流时出错: {str(e)}")
+
+
+@router.get("/", response_model=List[CameraResponse], summary="获取所有摄像头")
+async def get_all_cameras():
+    """
+    ## 📋 获取所有摄像头列表
+    
+    获取系统中所有已配置的摄像头信息。
+    
+    ### 📋 功能说明：
+    - 列出所有摄像头的详细信息
+    - 显示摄像头状态（在线/离线）
+    - 返回摄像头配置信息
+    
+    ### ✅ 返回信息：
+    - 摄像头列表（数组）
+    - 每个摄像头的完整信息：
+      - ID、名称、RTSP地址
+      - 位置、描述
+      - 状态、最后在线时间
+      - 创建时间、更新时间
+    
+    ### 💡 使用场景：
+    - 监控中心显示所有摄像头
+    - 配置管理界面
+    - 状态监控和报表
+    """
+    try:
+        cameras = camera_service.get_all_cameras()
+        return cameras
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"获取摄像头列表时出错: {str(e)}")
+
+
+@router.get("/{camera_id}", response_model=CameraResponse, summary="获取单个摄像头")
+async def get_camera(camera_id: str):
+    """
+    ## 🔍 获取单个摄像头详情
+    
+    根据摄像头ID获取具体的摄像头信息。
+    
+    ### 📝 参数说明：
+    - **camera_id** (必填): 摄像头唯一标识符
+    
+    ### ✅ 返回信息：
+    - 摄像头的完整详细信息
+    - 实时状态信息
+    - 配置参数和历史记录
+    
+    ### ⚠️ 注意事项：
+    - 需要有效的摄像头ID
+    - 摄像头必须已添加到系统
+    """
+    try:
+        camera = camera_service.get_camera(camera_id)
+        if not camera:
+            raise HTTPException(status_code=404, detail="摄像头不存在")
+        return camera
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"获取摄像头信息时出错: {str(e)}")
+
+
+@router.delete("/{camera_id}", response_model=dict, summary="删除摄像头")
+async def delete_camera(camera_id: str):
+    """
+    ## 🗑️ 删除摄像头
+    
+    从系统中删除指定的摄像头。
+    
+    ### 📝 参数说明：
+    - **camera_id** (必填): 要删除的摄像头ID
+    
+    ### ✅ 返回信息：
+    - 删除操作结果
+    - 被删除的摄像头信息
+    
+    ### ⚠️ 注意事项：
+    - 删除操作不可逆
+    - 关联的分析任务也会被停止
+    - 确保不再需要该摄像头的监控数据
+    """
+    try:
+        camera = camera_service.get_camera(camera_id)
+        if not camera:
+            raise HTTPException(status_code=404, detail="摄像头不存在")
+        
+        camera_service.delete_camera(camera_id)
+        return {
+            "状态": "成功",
+            "消息": "摄像头已删除",
+            "被删除的摄像头": camera.name
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"删除摄像头时出错: {str(e)}")
+
+
+@router.post("/with-filters", response_model=CameraResponse, summary="创建带过滤器的摄像头")
+async def create_camera_with_filters(
+    name: str = Form(...),
+    rtsp_url: str = Form(...),
+    filters: str = Form("[]")
+):
+    """
+    ## ⚙️ 创建带过滤器的摄像头
+    
+    创建摄像头并同时配置视频流过滤器。
+    
+    ### 📝 参数说明：
+    - **name**: 摄像头名称
+    - **rtsp_url**: RTSP视频流地址
+    - **filters**: 过滤器配置（JSON字符串）
+      - 支持多种过滤器：运动检测、区域限定、时间过滤等
+      - 格式示例: [{"type": "motion", "sensitivity": 0.5}]
+    
+    ### ✅ 返回信息：
+    - 摄像头创建确认
+    - 过滤器配置详情
+    """
+    try:
+        # Parse filters JSON
+        try:
+            filters_list = json.loads(filters)
+        except json.JSONDecodeError:
+            raise HTTPException(status_code=400, detail="过滤器配置格式错误，必须是有效的JSON")
+
+        # Create camera
+        camera_data = CameraCreate(
+            name=name,
+            rtsp_url=rtsp_url,
+            created_at=datetime.now().isoformat()
+        )
+
+        camera = camera_service.create_or_update_camera(camera_data)
+        
+        # Save filters
+        camera_service.save_camera_filters(camera.id, filters_list)
+
+        return CameraResponse(
+            id=camera.id,
+            name=camera.name,
+            rtsp_url=camera.rtsp_url,
+            message="带过滤器的摄像头创建成功"
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"创建带过滤器的摄像头时出错: {str(e)}")
+
+
+@router.put("/{camera_id}/filters", response_model=dict, summary="更新摄像头过滤器")
+async def update_camera_filters(
+    camera_id: str,
+    filters: str = Form("[]")
+):
+    """
+    ## ⚙️ 更新摄像头过滤器配置
+    
+    修改指定摄像头的视频流过滤器设置。
+    
+    ### 📝 参数说明：
+    - **camera_id**: 摄像头ID
+    - **filters**: 新的过滤器配置（JSON字符串）
+    
+    ### ✅ 返回信息：
+    - 更新操作结果
+    - 新的过滤器配置
+    """
+    try:
+        # Parse filters JSON
+        try:
+            filters_list = json.loads(filters)
+        except json.JSONDecodeError:
+            raise HTTPException(status_code=400, detail="过滤器配置格式错误")
+
+        camera_service.save_camera_filters(camera_id, filters_list)
+
+        return {
+            "状态": "成功",
+            "消息": "摄像头过滤器已更新",
+            "摄像头ID": camera_id,
+            "过滤器数量": len(filters_list)
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"更新摄像头过滤器时出错: {str(e)}")
+
+
+@router.get("/{camera_id}/filters", response_model=List[FilterConfig], summary="获取摄像头过滤器")
+async def get_camera_filters(camera_id: str):
+    """
+    ## 🔧 获取摄像头过滤器配置
+    
+    查看指定摄像头的所有过滤器设置。
+    
+    ### 📝 参数说明：
+    - **camera_id**: 摄像头ID
+    
+    ### ✅ 返回信息：
+    - 过滤器配置列表
+    - 每个过滤器的详细参数
+    """
+    try:
+        filters = camera_service.get_camera_filters(camera_id)
+        return filters
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"获取摄像头过滤器时出错: {str(e)}")
+﻿from fastapi import APIRouter, HTTPException, Form, Depends, Query, Body
+from typing import List, Optional
+from datetime import datetime
+import json
+
+from app.models.camera import Camera, CameraCreate, CameraResponse, FilterConfig
+from app.services.camera_service import CameraService
+from app.utils.stream_validator import StreamValidator
+
+router = APIRouter()
+camera_service = CameraService()
+stream_validator = StreamValidator()
+
+
+@router.post("/", response_model=CameraResponse, summary="创建摄像头")
+async def create_camera(
+    name: str = Form(..., description="摄像头名称，必填项"),
+    rtsp_url: str = Form(..., description="RTSP视频流地址，必填项"),
+    verify_stream: bool = Form(True, description="是否验证RTSP流，默认true")
+):
+    """
+    ## 📹 创建摄像头
+    
+    添加新的摄像头到监控系统。
+    
+    ### 📋 功能说明：
+    - 添加新的摄像头设备
+    - 可选验证RTSP流是否可访问
+    - 配置摄像头基本信息
+    
+    ### 📝 参数说明：
+    - **name** (必填): 摄像头名称，用于识别
+    - **rtsp_url** (必填): RTSP视频流地址
+      - 格式: rtsp://用户名:密码@IP地址:端口/路径
+      - 示例: rtsp://admin:password@192.168.1.100:554/stream1
+    - **verify_stream** (可选): 是否验证RTSP流
+      - true: 验证流可访问后再添加（推荐）
+      - false: 直接添加不验证
+    
+    ### ✅ 返回信息：
+    - 摄像头创建成功的确认信息
+    - 摄像头ID和详细信息
+    - 流验证结果（如验证）
+    
+    ### ⚠️ 注意事项：
+    - RTSP地址需要包含认证信息（如果摄像头需要登录）
+    - 建议启用流验证以确保摄像头正常工作
+    - 确保网络能够访问摄像头IP地址
+    """
+    try:
+        # Create camera data object with validation results
+        camera_data = CameraCreate(
+            name=name,
+            rtsp_url=rtsp_url,
+            created_at=datetime.now().isoformat()
+        )
+
+        # Validate the stream if requested
+        validation_result = None
+        if verify_stream:  # Use the new parameter name
+            validation_result = StreamValidator.validate_rtsp_stream(rtsp_url)
+
+            if not validation_result["is_valid"]:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"RTSP流验证失败: {validation_result['message']}"
+                )
+
+            # Save camera with validation data
+            camera = camera_service.create_or_update_camera(
+                camera_data,
+                validation_result=validation_result
+            )
+        else:
+            # Save camera without validation
+            camera = camera_service.create_or_update_camera(camera_data)
+
+        # Prepare success message
+        message = "摄像头添加成功"
+        if verify_stream:  # Use the new parameter name
+            message += " (已验证视频流)"
+
+        return CameraResponse(
+            id=camera.id,
+            name=camera.name,
+            rtsp_url=camera.rtsp_url,
+            message=message
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"创建摄像头时出错: {str(e)}")
+
+
+@router.post("/validate", response_model=dict, summary="验证RTSP流")
+async def validate_stream(
+    rtsp_url: str = Form(..., description="RTSP视频流地址，必填项"),
+    timeout: int = Form(5, description="超时时间（秒），默认5秒")
+):
+    """
+    ## 🔍 验证RTSP视频流
+    
+    测试RTSP流地址是否可访问和正常工作。
+    
+    ### 📋 功能说明：
+    - 验证RTSP流地址格式是否正确
+    - 测试摄像头连接是否正常
+    - 检查视频流是否可播放
+    
+    ### 📝 参数说明：
+    - **rtsp_url** (必填): RTSP视频流地址
+      - 格式: rtsp://用户名:密码@IP地址:端口/路径
+      - 示例: rtsp://admin:password@192.168.1.100:554/stream1
+    - **timeout** (可选): 连接超时时间（秒）
+      - 默认: 5秒
+      - 范围: 1-30秒
+    
+    ### ✅ 返回信息：
+    - 流验证结果（成功/失败）
+    - 验证详细信息和错误原因
+    - 连接延迟和性能数据
+    - 视频分辨率信息
+    
+    ### ⚠️ 注意事项：
+    - 需要正确的摄像头登录凭证
+    - 确保网络连接正常
+    - 摄像头需在线并支持RTSP协议
+    """
+    try:
+        validation_result = StreamValidator.validate_rtsp_stream(rtsp_url, timeout)
+
+        return {
+            "rtsp_url": rtsp_url,
+            "验证状态": "成功" if validation_result["is_valid"] else "失败",
+            "消息": validation_result["message"],
+            "详细信息": {
+                "视频宽度": validation_result["frame_width"],
+                "视频高度": validation_result["frame_height"],
+                "响应时间": f"{validation_result['response_time']}秒"
+            }
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"验证视频流时出错: {str(e)}")
+
+
+@router.get("/", response_model=List[CameraResponse], summary="获取所有摄像头")
+async def get_all_cameras():
+    """
+    ## 📋 获取所有摄像头列表
+    
+    获取系统中所有已配置的摄像头信息。
+    
+    ### 📋 功能说明：
+    - 列出所有摄像头的详细信息
+    - 显示摄像头状态（在线/离线）
+    - 返回摄像头配置信息
+    
+    ### ✅ 返回信息：
+    - 摄像头列表（数组）
+    - 每个摄像头的完整信息：
+      - ID、名称、RTSP地址
+      - 位置、描述
+      - 状态、最后在线时间
+      - 创建时间、更新时间
+    
+    ### 💡 使用场景：
+    - 监控中心显示所有摄像头
+    - 配置管理界面
+    - 状态监控和报表
+    """
+    try:
+        cameras = camera_service.get_all_cameras()
+        return cameras
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"获取摄像头列表时出错: {str(e)}")
+
+
+@router.get("/{camera_id}", response_model=CameraResponse, summary="获取单个摄像头")
+async def get_camera(camera_id: str):
+    """
+    ## 🔍 获取单个摄像头详情
+    
+    根据摄像头ID获取具体的摄像头信息。
+    
+    ### 📝 参数说明：
+    - **camera_id** (必填): 摄像头唯一标识符
+    
+    ### ✅ 返回信息：
+    - 摄像头的完整详细信息
+    - 实时状态信息
+    - 配置参数和历史记录
+    
+    ### ⚠️ 注意事项：
+    - 需要有效的摄像头ID
+    - 摄像头必须已添加到系统
+    """
+    try:
+        camera = camera_service.get_camera(camera_id)
+        if not camera:
+            raise HTTPException(status_code=404, detail="摄像头不存在")
+        return camera
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"获取摄像头信息时出错: {str(e)}")
+
+
+@router.delete("/{camera_id}", response_model=dict, summary="删除摄像头")
+async def delete_camera(camera_id: str):
+    """
+    ## 🗑️ 删除摄像头
+    
+    从系统中删除指定的摄像头。
+    
+    ### 📝 参数说明：
+    - **camera_id** (必填): 要删除的摄像头ID
+    
+    ### ✅ 返回信息：
+    - 删除操作结果
+    - 被删除的摄像头信息
+    
+    ### ⚠️ 注意事项：
+    - 删除操作不可逆
+    - 关联的分析任务也会被停止
+    - 确保不再需要该摄像头的监控数据
+    """
+    try:
+        camera = camera_service.get_camera(camera_id)
+        if not camera:
+            raise HTTPException(status_code=404, detail="摄像头不存在")
+        
+        camera_service.delete_camera(camera_id)
+        return {
+            "状态": "成功",
+            "消息": "摄像头已删除",
+            "被删除的摄像头": camera.name
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"删除摄像头时出错: {str(e)}")
+
+
+@router.post("/with-filters", response_model=CameraResponse, summary="创建带过滤器的摄像头")
+async def create_camera_with_filters(
+    name: str = Form(...),
+    rtsp_url: str = Form(...),
+    filters: str = Form("[]")
+):
+    """
+    ## ⚙️ 创建带过滤器的摄像头
+    
+    创建摄像头并同时配置视频流过滤器。
+    
+    ### 📝 参数说明：
+    - **name**: 摄像头名称
+    - **rtsp_url**: RTSP视频流地址
+    - **filters**: 过滤器配置（JSON字符串）
+      - 支持多种过滤器：运动检测、区域限定、时间过滤等
+      - 格式示例: [{"type": "motion", "sensitivity": 0.5}]
+    
+    ### ✅ 返回信息：
+    - 摄像头创建确认
+    - 过滤器配置详情
+    """
+    try:
+        # Parse filters JSON
+        try:
+            filters_list = json.loads(filters)
+        except json.JSONDecodeError:
+            raise HTTPException(status_code=400, detail="过滤器配置格式错误，必须是有效的JSON")
+
+        # Create camera
+        camera_data = CameraCreate(
+            name=name,
+            rtsp_url=rtsp_url,
+            created_at=datetime.now().isoformat()
+        )
+
+        camera = camera_service.create_or_update_camera(camera_data)
+        
+        # Save filters
+        camera_service.save_camera_filters(camera.id, filters_list)
+
+        return CameraResponse(
+            id=camera.id,
+            name=camera.name,
+            rtsp_url=camera.rtsp_url,
+            message="带过滤器的摄像头创建成功"
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"创建带过滤器的摄像头时出错: {str(e)}")
+
+
+@router.put("/{camera_id}/filters", response_model=dict, summary="更新摄像头过滤器")
+async def update_camera_filters(
+    camera_id: str,
+    filters: str = Form("[]")
+):
+    """
+    ## ⚙️ 更新摄像头过滤器配置
+    
+    修改指定摄像头的视频流过滤器设置。
+    
+    ### 📝 参数说明：
+    - **camera_id**: 摄像头ID
+    - **filters**: 新的过滤器配置（JSON字符串）
+    
+    ### ✅ 返回信息：
+    - 更新操作结果
+    - 新的过滤器配置
+    """
+    try:
+        # Parse filters JSON
+        try:
+            filters_list = json.loads(filters)
+        except json.JSONDecodeError:
+            raise HTTPException(status_code=400, detail="过滤器配置格式错误")
+
+        camera_service.save_camera_filters(camera_id, filters_list)
+
+        return {
+            "状态": "成功",
+            "消息": "摄像头过滤器已更新",
+            "摄像头ID": camera_id,
+            "过滤器数量": len(filters_list)
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"更新摄像头过滤器时出错: {str(e)}")
+
+
+@router.get("/{camera_id}/filters", response_model=List[FilterConfig], summary="获取摄像头过滤器")
+async def get_camera_filters(camera_id: str):
+    """
+    ## 🔧 获取摄像头过滤器配置
+    
+    查看指定摄像头的所有过滤器设置。
+    
+    ### 📝 参数说明：
+    - **camera_id**: 摄像头ID
+    
+    ### ✅ 返回信息：
+    - 过滤器配置列表
+    - 每个过滤器的详细参数
+    """
+    try:
+        filters = camera_service.get_camera_filters(camera_id)
+        return filters
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"获取摄像头过滤器时出错: {str(e)}")

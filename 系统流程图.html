@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A-AI智能视频监控系统 - 核心流程图</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #000;
+            margin-bottom: 30px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .diagram-container {
+            position: relative;
+            width: 1300px;
+            height: 950px;
+            margin: 0 auto;
+            background-image: 
+                linear-gradient(to right, #e0e0e0 1px, transparent 1px),
+                linear-gradient(to bottom, #e0e0e0 1px, transparent 1px);
+            background-size: 20px 20px;
+            border: 1px solid #ccc;
+        }
+        
+        /* 图例样式 */
+        .legend-box {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            width: 160px;
+            border: 1px solid #000;
+            background: #fff;
+            padding: 12px;
+            z-index: 20;
+        }
+        
+        .legend-title {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-align: center;
+            border-bottom: 1px solid #000;
+            padding-bottom: 5px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 11px;
+        }
+        
+        .legend-icon {
+            width: 25px;
+            height: 18px;
+            margin-right: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* 区域标题 */
+        .section-title {
+            position: absolute;
+            font-size: 12px;
+            font-weight: 600;
+            color: #000;
+            padding: 3px 8px;
+            background: #fff;
+            border: 1px solid #000;
+        }
+        
+        /* 分组框 */
+        .group-box {
+            position: absolute;
+            border: 1px dashed #000;
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .group-label {
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            background: #fff;
+            padding: 0 5px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        /* 外部实体 - 小人图标 */
+        .external-entity {
+            position: absolute;
+            text-align: center;
+            z-index: 15;
+        }
+        
+        .entity-icon {
+            width: 30px;
+            height: 45px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        .entity-head {
+            width: 14px;
+            height: 14px;
+            border: 1px solid #000;
+            border-radius: 50%;
+            background: #fff;
+            margin: 0 auto;
+        }
+        
+        .entity-body {
+            width: 16px;
+            height: 20px;
+            border: 1px solid #000;
+            background: #fff;
+            margin: 2px auto 0;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .entity-legs {
+            width: 16px;
+            height: 10px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        .entity-legs::before,
+        .entity-legs::after {
+            content: '';
+            position: absolute;
+            width: 1px;
+            height: 10px;
+            background: #000;
+            top: 0;
+        }
+        
+        .entity-legs::before {
+            left: 4px;
+        }
+        
+        .entity-legs::after {
+            right: 4px;
+        }
+        
+        .entity-name {
+            font-size: 11px;
+            margin-top: 3px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        
+        /* 处理节点 */
+        .process-node {
+            position: absolute;
+            width: 110px;
+            height: 45px;
+            border: 1px solid #000;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 500;
+            text-align: center;
+            z-index: 15;
+        }
+        
+        /* 判断节点 - 菱形 */
+        .decision-node {
+            position: absolute;
+            width: 70px;
+            height: 70px;
+            border: 1px solid #000;
+            background: #fff;
+            transform: rotate(45deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 15;
+        }
+        
+        .decision-text {
+            transform: rotate(-45deg);
+            font-size: 10px;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        /* 数据存储 - 开口矩形 */
+        .data-store {
+            position: absolute;
+            width: 95px;
+            height: 35px;
+            border: 1px solid #000;
+            border-top: none;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 500;
+            z-index: 15;
+        }
+        
+        /* SVG 线条 */
+        svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        .arrow-line {
+            stroke: #000;
+            stroke-width: 1;
+            fill: none;
+            marker-end: url(#arrowhead);
+        }
+        
+        .arrow-label {
+            font-size: 10px;
+            fill: #000;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>A-AI智能视频监控系统 - 核心流程图</h1>
+        
+        <div class="diagram-container">
+            <!-- SVG 层 -->
+            <svg>
+                <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                        <polygon points="0 0, 10 3, 0 6" fill="#000" />
+                    </marker>
+                </defs>
+            </svg>
+            
+            <!-- 区域标题 -->
+            <div class="section-title" style="left: 20px; top: 20px;">外部实体</div>
+            
+            <!-- 图例 -->
+            <div class="legend-box">
+                <div class="legend-title">图例</div>
+                <div class="legend-item">
+                    <div class="legend-icon">
+                        <div style="width: 14px; height: 14px; border: 1px solid #000; border-radius: 50%; background: #fff;"></div>
+                    </div>
+                    <span>角色/设备</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon" style="border: 1px solid #000; background: #fff;"></div>
+                    <span>处理节点</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon">
+                        <div style="width: 15px; height: 15px; border: 1px solid #000; background: #fff; transform: rotate(45deg);"></div>
+                    </div>
+                    <span>判断节点</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon" style="border: 1px solid #000; border-top: none; background: #fff;"></div>
+                    <span>数据存储</span>
+                </div>
+            </div>
+            
+            <!-- 分组框 - 配置管理 -->
+            <div class="group-box" style="left: 60px; top: 170px; width: 380px; height: 100px;">
+                <div class="group-label">配置管理</div>
+            </div>
+            
+            <!-- 分组框 - AI智能处理 -->
+            <div class="group-box" style="left: 60px; top: 310px; width: 640px; height: 120px;">
+                <div class="group-label">AI智能处理</div>
+            </div>
+            
+            <!-- 分组框 - 业务应用 -->
+            <div class="group-box" style="left: 60px; top: 470px; width: 970px; height: 100px;">
+                <div class="group-label">业务应用</div>
+            </div>
+            
+            <!-- 分组框 - 数据存储 -->
+            <div class="group-box" style="left: 60px; top: 620px; width: 1100px; height: 60px;">
+                <div class="group-label">数据存储</div>
+            </div>
+            
+            <!-- 外部实体 -->
+            <div class="external-entity" style="left: 80px; top: 50px;">
+                <div class="entity-icon">
+                    <div class="entity-head"></div>
+                    <div class="entity-body"></div>
+                    <div class="entity-legs"></div>
+                </div>
+                <div class="entity-name">系统管理员</div>
+            </div>
+            
+            <div class="external-entity" style="left: 400px; top: 50px;">
+                <div class="entity-icon">
+                    <div class="entity-head"></div>
+                    <div class="entity-body"></div>
+                    <div class="entity-legs"></div>
+                </div>
+                <div class="entity-name">摄像头设备</div>
+            </div>
+            
+            <div class="external-entity" style="left: 1100px; top: 50px;">
+                <div class="entity-icon">
+                    <div class="entity-head"></div>
+                    <div class="entity-body"></div>
+                    <div class="entity-legs"></div>
+                </div>
+                <div class="entity-name">监控操作员</div>
+            </div>
+            
+            <!-- 配置管理节点 -->
+            <div class="process-node" id="p1" style="left: 80px; top: 195px;">P1 摄像头管理</div>
+            <div class="process-node" id="p2" style="left: 210px; top: 195px;">P2 用户管理</div>
+            <div class="process-node" id="p3" style="left: 340px; top: 195px;">P3 规则管理</div>
+            
+            <!-- AI智能处理节点 -->
+            <div class="process-node" id="p4" style="left: 80px; top: 345px;">P4 YOLO检测</div>
+            <div class="process-node" id="p5" style="left: 230px; top: 345px;">P5 人脸识别</div>
+            <div class="decision-node" id="decision" style="left: 370px; top: 345px;">
+                <div class="decision-text">识别成功?</div>
+            </div>
+            <div class="process-node" id="p6" style="left: 540px; top: 345px;">P6 AI视觉查询</div>
+            
+            <!-- 业务应用节点 -->
+            <div class="process-node" id="p7" style="left: 80px; top: 500px;">P7 考勤追踪</div>
+            <div class="process-node" id="p8" style="left: 230px; top: 500px;">P8 入侵检测</div>
+            <div class="process-node" id="p9" style="left: 380px; top: 500px;">P9 人流统计</div>
+            <div class="process-node" id="p10" style="left: 530px; top: 500px;">P10 麻袋计数</div>
+            <div class="process-node" id="p11" style="left: 680px; top: 500px;">P11 系统监控</div>
+            
+            <!-- 数据存储 -->
+            <div class="data-store" id="d1" style="left: 80px; top: 635px;">D1 摄像头配置</div>
+            <div class="data-store" id="d2" style="left: 200px; top: 635px;">D2 用户数据</div>
+            <div class="data-store" id="d3" style="left: 320px; top: 635px;">D3 规则配置</div>
+            <div class="data-store" id="d4" style="left: 440px; top: 635px;">D4 考勤记录</div>
+            <div class="data-store" id="d5" style="left: 560px; top: 635px;">D5 安全事件</div>
+            <div class="data-store" id="d6" style="left: 680px; top: 635px;">D6 人流数据</div>
+            <div class="data-store" id="d7" style="left: 800px; top: 635px;">D7 麻袋计数</div>
+        </div>
+    </div>
+    
+    <script>
+        function drawArrow(x1, y1, x2, y2, label) {
+            const svg = document.querySelector('svg');
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', x1);
+            line.setAttribute('y1', y1);
+            line.setAttribute('x2', x2);
+            line.setAttribute('y2', y2);
+            line.setAttribute('class', 'arrow-line');
+            svg.appendChild(line);
+            
+            if (label) {
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', (x1 + x2) / 2);
+                text.setAttribute('y', (y1 + y2) / 2 - 5);
+                text.setAttribute('class', 'arrow-label');
+                text.setAttribute('text-anchor', 'middle');
+                text.textContent = label;
+                svg.appendChild(text);
+            }
+        }
+        
+        function drawPath(d, label, labelPos) {
+            const svg = document.querySelector('svg');
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', d);
+            path.setAttribute('class', 'arrow-line');
+            path.setAttribute('fill', 'none');
+            svg.appendChild(path);
+            
+            if (label && labelPos) {
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', labelPos.x);
+                text.setAttribute('y', labelPos.y);
+                text.setAttribute('class', 'arrow-label');
+                text.setAttribute('text-anchor', 'middle');
+                text.textContent = label;
+                svg.appendChild(text);
+            }
+        }
+        
+        function drawAllArrows() {
+            // === 第一层：外部实体到配置管理（垂直线，不交叉） ===
+            
+            // 系统管理员 → P1 摄像头管理
+            drawArrow(95, 95, 135, 195);
+            
+            // 系统管理员 → P2 用户管理
+            drawPath('M 115 95 L 115 140 L 265 140 L 265 195', null, null);
+            
+            // 系统管理员 → P3 规则管理
+            drawPath('M 115 95 L 115 130 L 395 130 L 395 195', null, null);
+            
+            // 摄像头设备 → P4 YOLO检测
+            drawArrow(415, 95, 135, 345);
+            
+            // 摄像头设备 → P5 人脸识别（视频流）
+            drawPath('M 430 95 L 430 160 L 285 160 L 285 345', '视频流', {x: 350, y: 155});
+            
+            // === 第二层：配置管理内部流动（水平线，不交叉） ===
+            
+            // P1 → P2
+            drawArrow(190, 217, 210, 217);
+            
+            // P2 → P3
+            drawArrow(320, 217, 340, 217);
+            
+            // P3 → P8（规则，向右再向下）
+            drawPath('M 450 217 L 460 217 L 460 480 L 285 480 L 285 500', '规则', {x: 462, y: 350});
+            
+            // === 第三层：AI智能处理流动（水平线，不交叉） ===
+            
+            // P4 → P5
+            drawArrow(190, 367, 230, 367);
+            
+            // P5 → 判断节点
+            drawArrow(340, 367, 370, 380);
+            
+            // 判断节点 → P6（是，向右）
+            drawArrow(440, 380, 540, 367);
+            drawArrow(440, 380, 540, 367, '是');
+            
+            // P6 → 监控操作员（向右）
+            drawArrow(650, 367, 1115, 95);
+            
+            // === 第四层：AI处理到业务应用（垂直线，不交叉） ===
+            
+            // P4 → P9（人流统计）
+            drawPath('M 135 390 L 135 430 L 435 430 L 435 500', null, null);
+            
+            // P4 → P10（麻袋计数）
+            drawPath('M 135 390 L 135 445 L 585 445 L 585 500', null, null);
+            
+            // 判断节点 → P7（考勤追踪）
+            drawPath('M 405 415 L 405 460 L 135 460 L 135 500', null, null);
+            
+            // 判断节点 → P8（入侵检测）
+            drawPath('M 405 415 L 405 475 L 285 475 L 285 500', null, null);
+            
+            // === 第五层：业务应用到数据存储（垂直线，不交叉） ===
+            
+            // P1 → D1
+            drawArrow(135, 240, 127, 635);
+            
+            // P2 → D2
+            drawArrow(265, 240, 247, 635);
+            
+            // P3 → D3
+            drawArrow(395, 240, 367, 635);
+            
+            // P7 → D4
+            drawArrow(135, 545, 487, 635);
+            
+            // P8 → D5
+            drawArrow(285, 545, 607, 635);
+            
+            // P9 → D6
+            drawArrow(435, 545, 727, 635);
+            
+            // P10 → D7
+            drawArrow(585, 545, 847, 635);
+            
+            // P11 → 所有数据存储（系统监控）
+            drawPath('M 735 522 L 760 522 L 760 605 L 127 605 L 127 635', null, null);
+            drawPath('M 760 605 L 247 605 L 247 635', null, null);
+            drawPath('M 760 605 L 367 605 L 367 635', null, null);
+            drawPath('M 760 605 L 487 605 L 487 635', null, null);
+            drawPath('M 760 605 L 607 605 L 607 635', null, null);
+            drawPath('M 760 605 L 727 605 L 727 635', null, null);
+            drawPath('M 760 605 L 847 605 L 847 635', null, null);
+        }
+        
+        window.addEventListener('load', drawAllArrows);
+    </script>
+</body>
+</html>

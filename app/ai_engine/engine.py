@@ -7,11 +7,7 @@ from datetime import datetime
 from typing import Dict, List, Any, Optional
 import uuid
 import asyncio
-
-from app.core.config import settings
-from app.services.camera_service import camera_service
-from app.services.user_service import UserService
-from app.utils.stream_validator import StreamValidator
+from pathlib import Path
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -26,21 +22,39 @@ class AIEngine:
         self.users: Dict[str, Any] = {}  # Store user info by ID
         self.active_processors: Dict[str, Any] = {}  # Store active processors by camera ID
         self.running: bool = False
+        from app.services.user_service import UserService
         self.user_service = UserService()  # Create our own instance
         self.attendance_records: Dict[str, Any] = {}  # Format: {date: {user_id: {'entry': time, 'exit': time, 'present': bool}}}
         self.unauthorized_logs: List[Any] = []  # List of unauthorized entry logs
         self.camera_active_status_cache: Dict[str, bool] = {}  # Initialize cache here
 
+        # 修复：使用 PROJECT_ROOT 而不是 BASE_DIR
+        try:
+            from app.core.config import settings
+            self.settings = settings
+        except ImportError:
+            # 备选导入方式
+            import sys
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            project_root = Path(current_dir).parent.parent
+            sys.path.insert(0, str(project_root))
+            from app.core.config import settings
+            self.settings = settings
+        
+        # 使用配置中的路径
+        self.project_root = self.settings.PROJECT_ROOT
+        self.data_dir = self.settings.DATA_DIR
+        self.logs_dir = self.settings.LOGS_DIR
+        
         # Create logs directory if it doesn't exist
-        self.logs_dir = settings.BASE_DIR / "logs"
         os.makedirs(self.logs_dir, exist_ok=True)
         
         # Create attendance directory if it doesn't exist
-        self.attendance_dir = settings.BASE_DIR / "data" / "attendance"
+        self.attendance_dir = self.data_dir / "attendance"
         os.makedirs(self.attendance_dir, exist_ok=True)
         
         # Create unauthorized directory if it doesn't exist
-        self.unauthorized_dir = settings.BASE_DIR / "data" / "unauthorized"
+        self.unauthorized_dir = self.data_dir / "unauthorized"
         os.makedirs(self.unauthorized_dir, exist_ok=True)
     
         self._load_data()  # Moved _load_data() call to the end of __init__
@@ -48,16 +62,21 @@ class AIEngine:
     def _load_data(self):
         """Load rules, cameras, and users data from JSON files"""
         # Load rules
-        rules_file = settings.DATA_DIR / "rules.json"
+        rules_file = self.data_dir / "rules.json"
         if os.path.exists(rules_file):
-            with open(rules_file, 'r') as f:
+            with open(rules_file, 'r', encoding='utf-8') as f:
                 self.rules = json.load(f)
                 logger.info(f"Loaded {len(self.rules)} rules from {rules_file}")
+        else:
+            logger.warning(f"Rules file not found at {rules_file}")
+            # 创建空的rules文件
+            with open(rules_file, 'w', encoding='utf-8') as f:
+                json.dump({}, f)
         
         # Load cameras
-        cameras_file = settings.DATA_DIR / "cameras.json"
+        cameras_file = self.data_dir / "cameras.json"
         if os.path.exists(cameras_file):
-            with open(cameras_file, 'r') as f:
+            with open(cameras_file, 'r', encoding='utf-8') as f:
                 loaded_cameras = json.load(f)
                 for cam_id, cam_data in loaded_cameras.items():
                     self.cameras[cam_id] = cam_data  # Ensure self.cameras is populated
@@ -66,13 +85,21 @@ class AIEngine:
         else:
             self.cameras = {}
             logger.info(f"Cameras file not found at {cameras_file}")
+            # 创建空的cameras文件
+            with open(cameras_file, 'w', encoding='utf-8') as f:
+                json.dump({}, f)
         
         # Load users
-        users_file = settings.DATA_DIR / "users.json"
+        users_file = self.data_dir / "users.json"
         if os.path.exists(users_file):
-            with open(users_file, 'r') as f:
+            with open(users_file, 'r', encoding='utf-8') as f:
                 self.users = json.load(f)
                 logger.info(f"Loaded {len(self.users)} users from {users_file}")
+        else:
+            logger.info(f"Users file not found at {users_file}")
+            # 创建空的users文件
+            with open(users_file, 'w', encoding='utf-8') as f:
+                json.dump({}, f)
     
     def start(self):
         """Start the AI engine processing"""
@@ -100,7 +127,10 @@ class AIEngine:
         
         # Clean up any active processors
         for camera_id, processor in self.active_processors.items():
-            processor.stop()
+            try:
+                processor.stop()
+            except:
+                pass
         
         self.active_processors = {}
         logger.info("AI Engine stopped successfully")
@@ -112,12 +142,17 @@ class AIEngine:
         try:
             while self.running:
                 # Check and update camera active statuses
-                loop.run_until_complete(self._check_camera_streams_async())
+                try:
+                    loop.run_until_complete(self._check_camera_streams_async())
+                except Exception as e:
+                    logger.error(f"Error checking camera streams: {str(e)}")
                 
                 self._process_rules()  # This remains synchronous for now
                 self._initialize_filter_processors()  # This remains synchronous
                 
-                time.sleep(settings.AI_ENGINE_MONITOR_INTERVAL_SECONDS)  # Use a configurable interval
+                # 使用配置中的间隔或默认值
+                monitor_interval = getattr(self.settings, 'AI_ENGINE_MONITOR_INTERVAL_SECONDS', 5)
+                time.sleep(monitor_interval)
         except Exception as e:
             logger.error(f"Error in monitor loop: {str(e)}", exc_info=True)
             self.running = False
@@ -139,23 +174,16 @@ class AIEngine:
             rtsp_url = camera_data["rtsp_url"]
             is_currently_active = False  # Assume inactive until proven active
             try:
-                # Use StreamValidator.is_stream_accessible or a similar lightweight check
-                # For a more robust check, you might try to grab a frame, but that's heavier.
-                # StreamValidator.validate_rtsp_stream returns a dict, we need a boolean.
-                # Let's assume StreamValidator has or we add a method like `is_stream_live`
-                # For now, we'll simulate with a placeholder or adapt StreamValidator
-                
-                # Placeholder for actual stream check logic:
-                # This should be a non-blocking check if possible, or run in an executor.
-                # For simplicity, let's use the existing validate_rtsp_stream and extract is_valid.
-                # This is a blocking call, so it's not ideal for a quick async loop.
-                # Consider making StreamValidator.validate_rtsp_stream async or using a thread pool executor.
-                
-                # Simplified approach: Use a timeout with the validator if possible
-                # For this example, we will call it directly. If it's too slow, it needs optimization.
-                validation_result = await asyncio.to_thread(StreamValidator.validate_rtsp_stream, rtsp_url)
-                is_currently_active = validation_result.get("is_valid", False)
-                logger.debug(f"Camera {camera_id} ({rtsp_url}) validation: {validation_result}")
+                # Try to import StreamValidator
+                try:
+                    from app.utils.stream_validator import StreamValidator
+                    # Use StreamValidator to check stream
+                    validation_result = await asyncio.to_thread(StreamValidator.validate_rtsp_stream, rtsp_url)
+                    is_currently_active = validation_result.get("is_valid", False)
+                    logger.debug(f"Camera {camera_id} ({rtsp_url}) validation: {validation_result}")
+                except ImportError:
+                    logger.warning(f"StreamValidator not available, skipping stream check for camera {camera_id}")
+                    continue
 
             except Exception as e:
                 logger.error(f"Error validating stream for camera {camera_id} ({rtsp_url}): {e}")
@@ -165,13 +193,22 @@ class AIEngine:
             previous_status = self.camera_active_status_cache.get(camera_id, False)
             if is_currently_active != previous_status:
                 logger.info(f"Camera {camera_id} status changed: {previous_status} -> {is_currently_active}")
-                updated_camera = await camera_service.update_camera_active_status(camera_id, is_currently_active)
-                if updated_camera:
-                    self.camera_active_status_cache[camera_id] = updated_camera.is_active
-                    # Update self.cameras entry as well to keep it in sync with the persisted data
-                    self.cameras[camera_id]["is_active"] = updated_camera.is_active
-                else:
-                    logger.warning(f"Failed to update active status for camera {camera_id} in service.")
+                
+                # Try to update via camera service
+                try:
+                    from app.services.camera_service import camera_service
+                    updated_camera = await camera_service.update_camera_active_status(camera_id, is_currently_active)
+                    if updated_camera:
+                        self.camera_active_status_cache[camera_id] = updated_camera.is_active
+                        # Update self.cameras entry as well to keep it in sync with the persisted data
+                        self.cameras[camera_id]["is_active"] = updated_camera.is_active
+                    else:
+                        logger.warning(f"Failed to update active status for camera {camera_id} in service.")
+                except ImportError:
+                    # If camera_service is not available, just update local cache
+                    logger.warning(f"Camera service not available, updating local cache only")
+                    self.camera_active_status_cache[camera_id] = is_currently_active
+                    self.cameras[camera_id]["is_active"] = is_currently_active
             else:
                 logger.debug(f"Camera {camera_id} status unchanged ({is_currently_active}).")
     
@@ -179,6 +216,7 @@ class AIEngine:
         """Initialize processors for cameras with specific filters enabled (without rules)"""
         try:
             # Initialize any filter processors here if needed
+            # 这部分可以留空，或者根据需要实现
             pass
         except Exception as e:
             logger.error(f"Error initializing filter processors: {str(e)}")
@@ -216,52 +254,61 @@ class AIEngine:
                 
                 # Process based on rule type
                 if event_type == "attendance":
-                    from .processors.attendance_processor import AttendanceProcessor
-                    
-                    # Get or create attendance processor for this rule
-                    if rule_id not in self.active_processors:
-                        self.active_processors[rule_id] = AttendanceProcessor(
-                            rule_data, 
-                            camera, 
-                            self.users,
-                            self.attendance_dir
-                        )
-                    
-                    # Process the rule
-                    self.active_processors[rule_id].process()
+                    try:
+                        from .processors.attendance_processor import AttendanceProcessor
+                        
+                        # Get or create attendance processor for this rule
+                        if rule_id not in self.active_processors:
+                            self.active_processors[rule_id] = AttendanceProcessor(
+                                rule_data, 
+                                camera, 
+                                self.users,
+                                self.attendance_dir
+                            )
+                        
+                        # Process the rule
+                        self.active_processors[rule_id].process()
+                    except ImportError:
+                        logger.warning(f"AttendanceProcessor not available, skipping rule {rule_id}")
                 
                 elif event_type == "authorized_entry":
-                    from .processors.authorized_entry_processor import AuthorizedEntryProcessor
-                    
-                    # Get or create authorized entry processor for this rule
-                    if rule_id not in self.active_processors:
-                        self.active_processors[rule_id] = AuthorizedEntryProcessor(
-                            rule_data, 
-                            camera, 
-                            self.users,
-                            self.unauthorized_dir
-                        )
-                    
-                    # Process the rule
-                    self.active_processors[rule_id].process()
+                    try:
+                        from .processors.authorized_entry_processor import AuthorizedEntryProcessor
+                        
+                        # Get or create authorized entry processor for this rule
+                        if rule_id not in self.active_processors:
+                            self.active_processors[rule_id] = AuthorizedEntryProcessor(
+                                rule_data, 
+                                camera, 
+                                self.users,
+                                self.unauthorized_dir
+                            )
+                        
+                        # Process the rule
+                        self.active_processors[rule_id].process()
+                    except ImportError:
+                        logger.warning(f"AuthorizedEntryProcessor not available, skipping rule {rule_id}")
                 
                 elif event_type.lower() == "ollamavision":
-                    from .processors.ai_vision_processor import OllamaVisionProcessor
-                    
-                    # Get or create Ollama Vision processor for this rule
-                    if rule_id not in self.active_processors:
-                        self.active_processors[rule_id] = OllamaVisionProcessor(
-                            rule_data,
-                            camera,
-                            self.users,
-                            self.unauthorized_dir
-                        )
-                    
-                    # Process the rule
-                    self.active_processors[rule_id].process()
+                    try:
+                        from .processors.ai_vision_processor import OllamaVisionProcessor
+                        
+                        # Get or create Ollama Vision processor for this rule
+                        if rule_id not in self.active_processors:
+                            self.active_processors[rule_id] = OllamaVisionProcessor(
+                                rule_data,
+                                camera,
+                                self.users,
+                                self.unauthorized_dir
+                            )
+                        
+                        # Process the rule
+                        self.active_processors[rule_id].process()
+                    except ImportError:
+                        logger.warning(f"OllamaVisionProcessor not available, skipping rule {rule_id}")
         
         except Exception as e:
-            logger.error(f"Error processing rules: {str(e)}")
+            logger.error(f"Error processing rules: {str(e)}", exc_info=True)
     
     def get_attendance_records(self, date=None):
         """Get attendance records for a specific date or all dates"""
@@ -276,5 +323,21 @@ class AIEngine:
             return self.unauthorized_logs
         
         # Filter logs for the specified date
-        date_logs = [log for log in self.unauthorized_logs if log.get("date") == date]
+        date_str = date.strftime("%Y-%m-%d") if isinstance(date, datetime) else str(date)
+        date_logs = [log for log in self.unauthorized_logs if log.get("date") == date_str]
         return date_logs
+    
+    def get_status(self):
+        """Get current engine status"""
+        return {
+            "running": self.running,
+            "rules_count": len(self.rules),
+            "cameras_count": len(self.cameras),
+            "users_count": len(self.users),
+            "active_processors": len(self.active_processors),
+            "attendance_records_count": len(self.attendance_records),
+            "unauthorized_logs_count": len(self.unauthorized_logs)
+        }
+
+# 创建全局实例（在 __init__.py 中使用）
+# ai_engine = AIEngine()

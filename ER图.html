@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A-AI智能视频监控系统 - ER图</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #000;
+            margin-bottom: 30px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .diagram-container {
+            position: relative;
+            width: 1300px;
+            height: 900px;
+            margin: 0 auto;
+            background-image: 
+                linear-gradient(to right, #e0e0e0 1px, transparent 1px),
+                linear-gradient(to bottom, #e0e0e0 1px, transparent 1px);
+            background-size: 20px 20px;
+            border: 1px solid #ccc;
+        }
+        
+        /* 图例样式 - 左上角 */
+        .legend-box {
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            width: 180px;
+            border: 1px solid #000;
+            background: #fff;
+            padding: 15px;
+            z-index: 20;
+        }
+        
+        .legend-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            text-align: center;
+            border-bottom: 1px solid #000;
+            padding-bottom: 5px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+        
+        .legend-icon {
+            width: 40px;
+            height: 25px;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* 实体 - 矩形 */
+        .entity {
+            position: absolute;
+            border: 1px solid #000;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            z-index: 15;
+        }
+        
+        /* 属性 - 椭圆 */
+        .attribute {
+            position: absolute;
+            border: 1px solid #000;
+            background: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 500;
+            text-align: center;
+            z-index: 15;
+        }
+        
+        /* 联系 - 菱形 */
+        .relationship {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border: 1px solid #000;
+            background: #fff;
+            transform: rotate(45deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 15;
+        }
+        
+        .relationship-text {
+            transform: rotate(-45deg);
+            font-size: 11px;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        /* 主键属性 - 下划线 */
+        .pk-attribute {
+            text-decoration: underline;
+        }
+        
+        /* SVG 线条 */
+        svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        .er-line {
+            stroke: #000;
+            stroke-width: 1;
+            fill: none;
+        }
+        
+        .cardinality {
+            font-size: 10px;
+            fill: #000;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>A-AI智能视频监控系统 - ER图</h1>
+        
+        <div class="diagram-container">
+            <!-- SVG 层 -->
+            <svg></svg>
+            
+            <!-- 图例 - 左上角 -->
+            <div class="legend-box">
+                <div class="legend-title">图例</div>
+                <div class="legend-item">
+                    <div class="legend-icon" style="border: 1px solid #000; background: #fff;"></div>
+                    <span>实体</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon" style="border: 1px solid #000; border-radius: 50%; background: #fff;"></div>
+                    <span>属性</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon">
+                        <div style="width: 20px; height: 20px; border: 1px solid #000; background: #fff; transform: rotate(45deg);"></div>
+                    </div>
+                    <span>联系</span>
+                </div>
+                <div class="legend-item">
+                    <span style="text-decoration: underline; margin-right: 10px;">下划线</span>
+                    <span>主键</span>
+                </div>
+            </div>
+            
+            <!-- 实体：用户 -->
+            <div class="entity" id="user" style="left: 200px; top: 400px; width: 100px; height: 50px;">用户</div>
+            
+            <!-- 用户属性 -->
+            <div class="attribute" id="user-id" style="left: 100px; top: 250px; width: 90px; height: 45px;">
+                <span class="pk-attribute">用户ID</span>
+            </div>
+            <div class="attribute" id="username" style="left: 200px; top: 250px; width: 80px; height: 40px;">用户名</div>
+            <div class="attribute" id="fullname" style="left: 290px; top: 250px; width: 80px; height: 40px;">全名</div>
+            <div class="attribute" id="age" style="left: 100px; top: 320px; width: 60px; height: 35px;">年龄</div>
+            <div class="attribute" id="role" style="left: 180px; top: 320px; width: 60px; height: 35px;">角色</div>
+            <div class="attribute" id="face-feature" style="left: 260px; top: 320px; width: 100px; height: 40px;">人脸特征</div>
+            <div class="attribute" id="photo-url" style="left: 100px; top: 550px; width: 90px; height: 40px;">照片URL</div>
+            <div class="attribute" id="user-created" style="left: 210px; top: 550px; width: 90px; height: 40px;">创建时间</div>
+            
+            <!-- 实体：摄像头 -->
+            <div class="entity" id="camera" style="left: 500px; top: 400px; width: 100px; height: 50px;">摄像头</div>
+            
+            <!-- 摄像头属性 -->
+            <div class="attribute" id="camera-id" style="left: 420px; top: 250px; width: 100px; height: 45px;">
+                <span class="pk-attribute">摄像头ID</span>
+            </div>
+            <div class="attribute" id="camera-name" style="left: 530px; top: 250px; width: 90px; height: 40px;">摄像头名称</div>
+            <div class="attribute" id="rtsp-url" style="left: 400px; top: 320px; width: 100px; height: 40px;">RTSP地址</div>
+            <div class="attribute" id="camera-status" style="left: 520px; top: 320px; width: 70px; height: 35px;">状态</div>
+            <div class="attribute" id="region-id" style="left: 610px; top: 320px; width: 80px; height: 40px;">区域ID</div>
+            <div class="attribute" id="camera-created" style="left: 410px; top: 550px; width: 90px; height: 40px;">创建时间</div>
+            <div class="attribute" id="camera-updated" style="left: 530px; top: 550px; width: 90px; height: 40px;">更新时间</div>
+            
+            <!-- 实体：规则 -->
+            <div class="entity" id="rule" style="left: 800px; top: 400px; width: 100px; height: 50px;">规则</div>
+            
+            <!-- 规则属性 -->
+            <div class="attribute" id="rule-id" style="left: 720px; top: 250px; width: 90px; height: 45px;">
+                <span class="pk-attribute">规则ID</span>
+            </div>
+            <div class="attribute" id="event-type" style="left: 830px; top: 250px; width: 80px; height: 40px;">事件类型</div>
+            <div class="attribute" id="rule-camera-id" style="left: 700px; top: 320px; width: 90px; height: 40px;">摄像头ID</div>
+            <div class="attribute" id="threshold" style="left: 810px; top: 320px; width: 80px; height: 35px;">置信度阈值</div>
+            <div class="attribute" id="rule-status" style="left: 910px; top: 320px; width: 70px; height: 35px;">启用状态</div>
+            <div class="attribute" id="rule-created" style="left: 710px; top: 550px; width: 90px; height: 40px;">创建时间</div>
+            <div class="attribute" id="rule-updated" style="left: 830px; top: 550px; width: 90px; height: 40px;">更新时间</div>
+            
+            <!-- 实体：考勤记录 -->
+            <div class="entity" id="attendance" style="left: 1050px; top: 180px; width: 110px; height: 50px;">考勤记录</div>
+            
+            <!-- 考勤记录属性 -->
+            <div class="attribute" id="attendance-id" style="left: 1130px; top: 100px; width: 100px; height: 45px;">
+                <span class="pk-attribute">记录ID</span>
+            </div>
+            <div class="attribute" id="att-user-id" style="left: 1020px; top: 100px; width: 80px; height: 40px;">用户ID</div>
+            <div class="attribute" id="event-time" style="left: 1210px; top: 100px; width: 80px; height: 40px;">时间戳</div>
+            <div class="attribute" id="event-type-att" style="left: 980px; top: 50px; width: 70px; height: 35px;">事件类型</div>
+            <div class="attribute" id="location" style="left: 1070px; top: 50px; width: 70px; height: 35px;">位置</div>
+            <div class="attribute" id="confidence" style="left: 1160px; top: 50px; width: 70px; height: 35px;">置信度</div>
+            <div class="attribute" id="work-hours" style="left: 1250px; top: 150px; width: 80px; height: 40px;">工作时长</div>
+            <div class="attribute" id="attendance-status" style="left: 1250px; top: 220px; width: 80px; height: 40px;">出勤状态</div>
+            
+            <!-- 实体：安全事件 -->
+            <div class="entity" id="security" style="left: 1050px; top: 400px; width: 110px; height: 50px;">安全事件</div>
+            
+            <!-- 安全事件属性 -->
+            <div class="attribute" id="event-id" style="left: 1200px; top: 350px; width: 90px; height: 45px;">
+                <span class="pk-attribute">事件ID</span>
+            </div>
+            <div class="attribute" id="sec-event-type" style="left: 1100px; top: 350px; width: 80px; height: 40px;">事件类型</div>
+            <div class="attribute" id="sec-region-id" style="left: 990px; top: 350px; width: 80px; height: 40px;">区域ID</div>
+            <div class="attribute" id="sec-user-id" style="left: 990px; top: 550px; width: 80px; height: 40px;">人员ID</div>
+            <div class="attribute" id="screenshot" style="left: 1100px; top: 550px; width: 80px; height: 40px;">截图URL</div>
+            <div class="attribute" id="process-status" style="left: 1210px; top: 550px; width: 80px; height: 40px;">处理状态</div>
+            
+            <!-- 实体：人流数据 -->
+            <div class="entity" id="crowd" style="left: 1050px; top: 620px; width: 110px; height: 50px;">人流数据</div>
+            
+            <!-- 人流数据属性 -->
+            <div class="attribute" id="crowd-id" style="left: 1200px; top: 720px; width: 90px; height: 45px;">
+                <span class="pk-attribute">记录ID</span>
+            </div>
+            <div class="attribute" id="crowd-region" style="left: 1100px; top: 720px; width: 80px; height: 40px;">区域ID</div>
+            <div class="attribute" id="person-count" style="left: 990px; top: 720px; width: 80px; height: 40px;">人员数量</div>
+            <div class="attribute" id="density" style="left: 990px; top: 800px; width: 70px; height: 35px;">密度等级</div>
+            <div class="attribute" id="trend" style="left: 1080px; top: 800px; width: 70px; height: 35px;">趋势</div>
+            <div class="attribute" id="crowd-time" style="left: 1170px; top: 800px; width: 80px; height: 40px;">时间戳</div>
+            
+            <!-- 联系：管理 -->
+            <div class="relationship" id="manage" style="left: 360px; top: 385px;">
+                <div class="relationship-text">管理</div>
+            </div>
+            
+            <!-- 联系：配置 -->
+            <div class="relationship" id="configure" style="left: 660px; top: 385px;">
+                <div class="relationship-text">配置</div>
+            </div>
+            
+            <!-- 联系：识别 -->
+            <div class="relationship" id="recognize" style="left: 560px; top: 180px;">
+                <div class="relationship-text">识别</div>
+            </div>
+            
+            <!-- 联系：触发 -->
+            <div class="relationship" id="trigger" style="left: 960px; top: 180px;">
+                <div class="relationship-text">触发</div>
+            </div>
+            
+            <!-- 联系：检测 -->
+            <div class="relationship" id="detect" style="left: 960px; top: 400px;">
+                <div class="relationship-text">检测</div>
+            </div>
+            
+            <!-- 联系：统计 -->
+            <div class="relationship" id="statistic" style="left: 960px; top: 620px;">
+                <div class="relationship-text">统计</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function drawLine(x1, y1, x2, y2, cardinality1, cardinality2) {
+            const svg = document.querySelector('svg');
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', x1);
+            line.setAttribute('y1', y1);
+            line.setAttribute('x2', x2);
+            line.setAttribute('y2', y2);
+            line.setAttribute('class', 'er-line');
+            svg.appendChild(line);
+            
+            // 添加基数标注
+            if (cardinality1) {
+                const text1 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text1.setAttribute('x', (x1 + x2) / 2 - 15);
+                text1.setAttribute('y', (y1 + y2) / 2 - 5);
+                text1.setAttribute('class', 'cardinality');
+                text1.textContent = cardinality1;
+                svg.appendChild(text1);
+            }
+            
+            if (cardinality2) {
+                const text2 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text2.setAttribute('x', (x1 + x2) / 2 + 10);
+                text2.setAttribute('y', (y1 + y2) / 2 - 5);
+                text2.setAttribute('class', 'cardinality');
+                text2.textContent = cardinality2;
+                svg.appendChild(text2);
+            }
+        }
+        
+        function drawAllLines() {
+            // === 用户实体与属性的连接 ===
+            drawLine(250, 400, 145, 295);  // 用户 - 用户ID
+            drawLine(250, 400, 240, 290);  // 用户 - 用户名
+            drawLine(250, 400, 330, 290);  // 用户 - 全名
+            drawLine(250, 400, 130, 337);  // 用户 - 年龄
+            drawLine(250, 400, 210, 337);  // 用户 - 角色
+            drawLine(250, 400, 310, 340);  // 用户 - 人脸特征
+            drawLine(250, 400, 145, 550);  // 用户 - 照片URL
+            drawLine(250, 400, 255, 550);  // 用户 - 创建时间
+            
+            // === 摄像头实体与属性的连接 ===
+            drawLine(550, 400, 470, 295);  // 摄像头 - 摄像头ID
+            drawLine(550, 400, 575, 290);  // 摄像头 - 摄像头名称
+            drawLine(550, 400, 450, 340);  // 摄像头 - RTSP地址
+            drawLine(550, 400, 555, 337);  // 摄像头 - 状态
+            drawLine(550, 400, 650, 340);  // 摄像头 - 区域ID
+            drawLine(550, 400, 455, 550);  // 摄像头 - 创建时间
+            drawLine(550, 400, 575, 550);  // 摄像头 - 更新时间
+            
+            // === 规则实体与属性的连接 ===
+            drawLine(850, 400, 765, 295);  // 规则 - 规则ID
+            drawLine(850, 400, 870, 290);  // 规则 - 事件类型
+            drawLine(850, 400, 745, 340);  // 规则 - 摄像头ID
+            drawLine(850, 400, 850, 337);  // 规则 - 置信度阈值
+            drawLine(850, 400, 945, 337);  // 规则 - 启用状态
+            drawLine(850, 400, 755, 550);  // 规则 - 创建时间
+            drawLine(850, 400, 875, 550);  // 规则 - 更新时间
+            
+            // === 考勤记录实体与属性的连接 ===
+            drawLine(1105, 180, 1180, 145);  // 考勤记录 - 记录ID
+            drawLine(1105, 180, 1060, 140);  // 考勤记录 - 用户ID
+            drawLine(1105, 180, 1250, 140);  // 考勤记录 - 时间戳
+            drawLine(1105, 180, 1015, 85);  // 考勤记录 - 事件类型
+            drawLine(1105, 180, 1105, 85);  // 考勤记录 - 位置
+            drawLine(1105, 180, 1195, 85);  // 考勤记录 - 置信度
+            drawLine(1105, 180, 1290, 190);  // 考勤记录 - 工作时长
+            drawLine(1105, 180, 1290, 260);  // 考勤记录 - 出勤状态
+            
+            // === 安全事件实体与属性的连接 ===
+            drawLine(1105, 400, 1245, 385);  // 安全事件 - 事件ID
+            drawLine(1105, 400, 1140, 390);  // 安全事件 - 事件类型
+            drawLine(1105, 400, 1030, 390);  // 安全事件 - 区域ID
+            drawLine(1105, 400, 1030, 550);  // 安全事件 - 人员ID
+            drawLine(1105, 400, 1140, 550);  // 安全事件 - 截图URL
+            drawLine(1105, 400, 1250, 550);  // 安全事件 - 处理状态
+            
+            // === 人流数据实体与属性的连接 ===
+            drawLine(1105, 620, 1245, 720);  // 人流数据 - 记录ID
+            drawLine(1105, 620, 1140, 720);  // 人流数据 - 区域ID
+            drawLine(1105, 620, 1030, 720);  // 人流数据 - 人员数量
+            drawLine(1105, 620, 1025, 800);  // 人流数据 - 密度等级
+            drawLine(1105, 620, 1115, 800);  // 人流数据 - 趋势
+            drawLine(1105, 620, 1210, 800);  // 人流数据 - 时间戳
+            
+            // === 实体之间的联系 ===
+            
+            // 用户 --管理-- 摄像头 (1:n)
+            drawLine(300, 425, 360, 425, '1', '');
+            drawLine(440, 425, 500, 425, '', 'n');
+            
+            // 用户 --配置-- 规则 (1:n)
+            drawLine(300, 425, 660, 425, '1', '');
+            drawLine(740, 425, 800, 425, '', 'n');
+            
+            // 用户 --识别-- 考勤记录 (1:n)
+            drawLine(250, 400, 560, 220, '1', '');
+            drawLine(640, 220, 1050, 205, '', 'n');
+            
+            // 摄像头 --触发-- 考勤记录 (1:n)
+            drawLine(550, 400, 960, 220, '1', '');
+            drawLine(1040, 220, 1050, 205, '', 'n');
+            
+            // 规则 --检测-- 安全事件 (1:n)
+            drawLine(850, 400, 960, 440, '1', '');
+            drawLine(1040, 440, 1050, 425, '', 'n');
+            
+            // 摄像头 --统计-- 人流数据 (1:n)
+            drawLine(550, 450, 960, 660, '1', '');
+            drawLine(1040, 660, 1050, 645, '', 'n');
+        }
+        
+        window.addEventListener('load', drawAllLines);
+    </script>
+</body>
+</html>

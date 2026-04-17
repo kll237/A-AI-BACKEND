@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A-AI智能视频监控系统 - 数据流程图</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            background-color: #fff;
+            padding: 20px;
+        }
+        .page {
+            width: 1200px;
+            height: 700px;
+            margin: 0 auto 50px auto;
+            position: relative;
+            background-image: 
+                linear-gradient(to right, #e0e0e0 1px, transparent 1px),
+                linear-gradient(to bottom, #e0e0e0 1px, transparent 1px);
+            background-size: 20px 20px;
+            border: 1px solid #333;
+        }
+        .page-title {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #000;
+            z-index: 100;
+        }
+        .legend {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 11px;
+            color: #000;
+            z-index: 100;
+            background: #fff;
+            padding: 8px;
+            border: 1px solid #333;
+        }
+        .legend-item {
+            margin: 5px 0;
+            display: flex;
+            align-items: center;
+        }
+        .legend-box {
+            width: 35px;
+            height: 22px;
+            border: 1px solid #000;
+            margin-right: 8px;
+        }
+        .legend-process {
+            width: 35px;
+            height: 22px;
+            border: 1px solid #000;
+            border-radius: 8px;
+            margin-right: 8px;
+        }
+        .legend-store {
+            width: 35px;
+            height: 15px;
+            border-left: 3px solid #000;
+            border-right: 3px solid #000;
+            margin-right: 8px;
+        }
+        .legend-line {
+            width: 35px;
+            height: 0;
+            border-top: 1px solid #000;
+            margin-right: 8px;
+        }
+        
+        .external-entity {
+            position: absolute;
+            width: 90px;
+            height: 45px;
+            border: 1px solid #000;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 11px;
+            z-index: 10;
+        }
+        
+        .process {
+            position: absolute;
+            width: 110px;
+            height: 50px;
+            border: 1px solid #000;
+            border-radius: 10px;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 10px;
+            z-index: 10;
+        }
+        
+        .process-large {
+            position: absolute;
+            width: 140px;
+            height: 60px;
+            border: 1px solid #000;
+            border-radius: 12px;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 12px;
+            z-index: 10;
+            font-weight: bold;
+        }
+        
+        .data-store {
+            position: absolute;
+            height: 30px;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-left: 3px solid #000;
+            border-right: 3px solid #000;
+            padding: 0 8px;
+            background: #fff;
+        }
+        .data-store-text {
+            font-size: 9px;
+            white-space: nowrap;
+        }
+        
+        .svg-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+        }
+        
+        .label {
+            font-size: 9px;
+            fill: #000;
+        }
+        
+        .page-break {
+            page-break-after: always;
+        }
+    </style>
+</head>
+<body>
+    <!-- ==================== 第0层：上下文图 ==================== -->
+    <div class="page page-break">
+        <div class="page-title">图1  第0层数据流程图（上下文图）</div>
+        
+        <div class="legend">
+            <div style="font-weight: bold; margin-bottom: 5px; border-bottom: 1px solid #333; padding-bottom: 3px;">图例</div>
+            <div class="legend-item">
+                <div class="legend-box"></div>
+                <span>外部实体</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-process"></div>
+                <span>处理过程</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-store"></div>
+                <span>数据存储</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-line"></div>
+                <span>数据流</span>
+            </div>
+        </div>
+        
+        <!-- 外部实体 -->
+        <div class="external-entity" style="left: 100px; top: 180px;">系统管理员</div>
+        <div class="external-entity" style="left: 100px; top: 400px;">摄像头设备</div>
+        <div class="external-entity" style="left: 1010px; top: 180px;">监控操作员</div>
+        <div class="external-entity" style="left: 1010px; top: 400px;">业务分析员</div>
+        
+        <!-- 系统 -->
+        <div class="process-large" style="left: 530px; top: 290px;">
+            0<br>A-AI智能视频<br>监控系统
+        </div>
+        
+        <!-- 数据存储 -->
+        <div class="data-store" style="left: 560px; top: 520px; width: 80px;">
+            <span class="data-store-text">系统数据库</span>
+        </div>
+        
+        <svg class="svg-layer">
+            <!-- 系统管理员 → 系统：配置信息 -->
+            <path d="M190,195 L350,195 L350,315 L530,315" stroke="#000" stroke-width="1.5" fill="none"/>
+            <text x="260" y="190" class="label">配置信息</text>
+            
+            <!-- 系统 → 系统管理员：配置确认 -->
+            <path d="M530,325 L360,325 L360,210 L190,210" stroke="#000" stroke-width="1.5" fill="none"/>
+            <text x="260" y="205" class="label">配置确认</text>
+            
+            <!-- 摄像头 → 系统：实时视频流 -->
+            <path d="M190,422 L450,422 L450,345 L530,345" stroke="#000" stroke-width="1.5" fill="none"/>
+            <text x="300" y="417" class="label">实时视频流</text>
+            
+            <!-- 系统 → 监控操作员：监控画面 -->
+            <path d="M670,315 L800,315 L800,202 L1010,202" stroke="#000" stroke-width="1.5" fill="none"/>
+            <text x="880" y="197" class="label">监控画面</text>
+            
+            <!-- 监控操作员 → 系统：查询请求 -->
+            <path d="M1010,218 L820,218 L820,325 L670,325" stroke="#000" stroke-width="1.5" fill="none"/>
+            <text x="880" y="230" class="label">查询请求</text>
+            
+            <!-- 系统 → 业务分析员：考勤记录 -->
+            <path d="M670,345 L790,345 L790,422 L1010,422" stroke="#000" stroke-width="1.5" fill="none"/>
+            <text x="880" y="417" class="label">考勤记录</text>
+            
+            <!-- 业务分析员 → 系统：统计查询 -->
+            <path d="M1010,438 L810,438 L810,355 L670,355" stroke="#000" stroke-width="1.5" fill="none"/>
+            <text x="880" y="450" class="label">统计查询</text>
+            
+            <!-- 系统 → 数据库：读写 -->
+            <line x1="600" y1="350" x2="600" y2="520" stroke="#000" stroke-width="1.5"/>
+            <text x="610" y="440" class="label">读写</text>
+        </svg>
+    </div>
+    
+    <!-- ==================== 第1层-1：配置管理子图 ==================== -->
+    <div class="page page-break">
+        <div class="page-title">图2-1  第1层数据流程图 - 配置管理</div>
+        
+        <div class="legend">
+            <div style="font-weight: bold; margin-bottom: 5px; border-bottom: 1px solid #333; padding-bottom: 3px;">图例</div>
+            <div class="legend-item">
+                <div class="legend-box"></div>
+                <span>外部实体</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-process"></div>
+                <span>处理过程</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-store"></div>
+                <span>数据存储</span>
+            </div>
+        </div>
+        
+        <!-- 外部实体 -->
+        <div class="external-entity" style="left: 100px; top: 280px;">系统管理员</div>
+        
+        <!-- 处理过程 -->
+        <div class="process" style="left: 400px; top: 150px;">1.0<br>摄像头管理</div>
+        <div class="process" style="left: 400px; top: 270px;">2.0<br>用户管理</div>
+        <div class="process" style="left: 400px; top: 390px;">3.0<br>规则管理</div>
+        
+        <!-- 数据存储 -->
+        <div class="data-store" style="left: 700px; top: 165px; width: 100px;">
+            <span class="data-store-text">D1 摄像头配置</span>
+        </div>
+        <div class="data-store" style="left: 700px; top: 285px; width: 90px;">
+            <span class="data-store-text">D2 用户数据</span>
+        </div>
+        <div class="data-store" style="left: 700px; top: 405px; width: 90px;">
+            <span class="data-store-text">D3 规则配置</span>
+        </div>
+        
+        <svg class="svg-layer">
+            <!-- 系统管理员 → P1：摄像头配置 -->
+            <path d="M190,290 L300,290 L300,175 L400,175" stroke="#000" stroke-width="1.5" fill="none"/>
+            <text x="230" y="285" class="label">摄像头配置</text>
+            
+            <!-- 系统管理员 → P2：用户信息 -->
+            <path d="M190,302 L320,302 L320,295 L400,295" stroke="#000" stroke-width="1.5" fill="none"/>
+            <text x="230" y="320" class="label">用户信息</text>
+            
+            <!-- 系统管理员 → P3：规则配置 -->
+            <path d="M190,315 L280,315 L280,415 L400,415" stroke="#000" stroke-width="1.5" fill="none"/>
+            <text x="210" y="365" class="label">规则配置</text>
+            
+            <!-- P1 → D1：写入 -->
+            <path d="M510,175 L700,175" stroke="#000" stroke-width="1.5" fill="none"/>
+            <text x="590" y="168" class="label">写入</text>
+            
+            <!-- P2 → D2：写入 -->
+            <path d="M510,295 L700,295" stroke="#000" stroke-width="1.5" fill="none"/>
+            <text x="590" y="288" class="label">写入</text>
+            
+            <!-- P3 → D3：写入 -->
+            <path d="M510,415 L700,415" stroke="#000" stroke-width="1.5" fill="none"/>
+            <text x="590" y="408" class="label">写入</text>
+        </svg>
+    </div>
+    
+    <!-- ==================== 第1层-2：视频处理子图 ==================== -->
+    <div class="page page-break">
+        <div class="page-title">图2-2  第1层数据流程图 - 视频处理</div>
+        
+        <div class="legend">
+            <div style="font-weight: bold; margin-bottom: 5px; border-bottom: 1px solid #333; padding-bottom: 3px;">图例</div>
+            <div class="legend-item">
+                <div class="legend-box"></div>
+                <span>外部实体</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-process"></div>
+                <span>处理过程</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-store"></div>
+                <span>数据存储</span>
+            </div>
+        </div>
+        
+        <!-- 外部实体 -->
+        <div class="external-entity" style="left: 80px; top: 280px;">摄像头设备</div>
+        <div class="external-entity" style="left: 1010px; top: 150px;">考勤追踪(P7)</div>
+        <div class="external-entity" style="left: 1010px; top: 280px;">入侵检测(P8)</div>
+        <div class="external-entity" style="left: 1010px; top: 410px;">人流统计(P9)</div>
+        
+        <!-- 处理过程 -->
+        <div class="process" style="left: 350px; top: 250px;">4.0<br>YOLO检测</div>
+        <div class="process" style="left: 600px; top: 250px;">5.0<br>人脸识别</div>
+        
+        <!-- 数据存储 -->
+        <div class="data-store" style="left: 620px; top: 480px; width: 90px;">
+            <span class="data-store-text">D2 用户数据</span>
+        </div>
+        
+        <svg class="svg-layer">
+            <!-- 摄像头 → P4：视频流 -->
+            <path d="M170,295 L280,295 L280,275 L350,275" stroke="#000" stroke-width="1.5" fill="none"/>
+            <text x="220" y="290" class="label">视频流</text>
+            
+            <!-- P4 → P5：检测结果 -->
+            <path d="M460,275 L600,275" stroke="#000" stroke-width="1.5" fill="none"/>
+            <text x="510" y="268" class="label">检测结果</text>
+            
+            <!-- P4 → P9：人员位置 -->
+            <path d="M460,285 L500,285 L500,432 L1010,432" stroke="#000" stroke-width="1.5" fill="none"/>
+            <text x="750" y="445" class="label">人员位置</text>
+            
+            <!-- P5 → P7：识别结果 -->
+            <path d="M710,265 L800,265 L800,172 L1010,172" stroke="#000" stroke-width="1.5" fill="none"/>
+            <text x="850" y="260" class="label">识别结果</text>
+            
+            <!-- P5 → P8：识别结果 -->
+            <path d="M710,285 L820,285 L820,302 L1010,302" stroke="#000" stroke-width="1.5" fill="none"/>
+            <text x="850" y="315" class="label">识别结果</text>
+            
+            <!-- P5 ↔ D2：读取特征 -->
+            <line x1="665" y1="300" x2="665" y2="480" stroke="#000" stroke-width="1.5"/>
+            <text x="675" y="395" class="label">读取特征</text>
+        </svg>
+    </div>
+    
+    <!-- ==================== 第1层-3：业务应用子图 ==================== -->
+    <div class="page">
+        <div class="page-title">图2-3  第1层数据流程图 - 业务应用</div>
+        
+        <div class="legend">
+            <div style="font-weight: bold; margin-bottom: 5px; border-bottom: 1px solid #333; padding-bottom: 3px;">图例</div>
+            <div class="legend-item">
+                <div class="legend-box"></div>
+                <span>外部实体</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-process"></div>
+                <span>处理过程</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-store"></div>
+                <span>数据存储</span>
+            </div>
+        </div>
+        
+        <!-- 外部实体 -->
+        <div class="external-entity" style="left: 80px; top: 150px;">人脸识别(P5)</div>
+        <div class="external-entity" style="left: 80px; top: 320px;">YOLO检测(P4)</div>
+        <div class="external-entity" style="left: 80px; top: 490px;">监控操作员</div>
+        <div class="external-entity" style="left: 1010px; top: 280px;">业务分析员</div>
+        
+        <!-- 处理过程 -->
+        <div class="process" style="left: 350px; top: 120px;">7.0<br>考勤追踪</div>
+        <div class="process" style="left: 350px; top: 220px;">8.0<br>入侵检测</div>
+        <div class="process" style="left: 350px; top: 320px;">9.0<br>人流统计</div>
+        <div class="process" style="left: 350px; top: 420px;">10.0<br>麻袋计数</div>
+        <div class="process" style="left: 350px; top: 540px;">6.0<br>AI视觉查询</div>
+        
+        <!-- 数据存储 -->
+        <div class="data-store" style="left: 680px; top: 135px; width: 90px;">
+            <span class="data-store-text">D4 考勤记录</span>
+        </div>
+        <div class="data-store" style="left: 680px; top: 235px; width: 90px;">
+            <span class="data-store-text">D5 安全事件</span>
+        </div>
+        <div class="data-store" style="left: 680px; top: 335px; width: 90px;">
+            <span class="data-store-text">D6 人流数据</span>
+        </div>
+        <div class="data-store" style="left: 680px; top: 435px; width: 90px;">
+            <span class="data-store-text">D7 麻袋计数</span>
+        </div>
+        <div class="data-store" style="left: 680px; top: 555px; width: 90px;">
+            <span class="data-store-text">D3 规则配置</span>
+        </div>
+        
+        <svg class="svg-layer">
+            <!-- P5 → P7：人脸识别结果 -->
+            <path d="M170,165 L280,165 L280,145 L350,145" stroke="#000" stroke-width="1.5" fill="none"/>
+            <text x="200" y="160" class="label">人脸识别结果</text>
+            
+            <!-- P5 → P8：人脸识别结果 -->
+            <path d="M170,180 L260,180 L260,245 L350,245" stroke="#000" stroke-width="1.5" fill="none"/>
+            <text x="185" y="220" class="label">人脸识别结果</text>
+            
+            <!-- P4 → P9：检测数据 -->
+            <path d="M170,335 L280,335 L280,345 L350,345" stroke="#000" stroke-width="1.5" fill="none"/>
+            <text x="210" y="350" class="label">检测数据</text>
+            
+            <!-- P4 → P10：视频流 -->
+            <path d="M170,350 L240,350 L240,445 L350,445" stroke="#000" stroke-width="1.5" fill="none"/>
+            <text x="250" y="400" class="label">视频流</text>
+            
+            <!-- 监控操作员 → P6：查询请求 -->
+            <path d="M170,505 L280,505 L280,565 L350,565" stroke="#000" stroke-width="1.5" fill="none"/>
+            <text x="190" y="540" class="label">查询请求</text>
+            
+            <!-- P6 → 监控操作员：查询结果 -->
+            <path d="M350,555 L290,555 L290,512 L170,512" stroke="#000" stroke-width="1.5" fill="none"/>
+            <text x="190" y="570" class="label">查询结果</text>
+            
+            <!-- P7 → D4：写入 -->
+            <path d="M460,145 L680,145" stroke="#000" stroke-width="1.5" fill="none"/>
+            <text x="560" y="138" class="label">写入</text>
+            
+            <!-- P8 → D5：写入 -->
+            <path d="M460,245 L680,245" stroke="#000" stroke-width="1.5" fill="none"/>
+            <text x="560" y="238" class="label">写入</text>
+            
+            <!-- P9 → D6：写入 -->
+            <path d="M460,345 L680,345" stroke="#000" stroke-width="1.5" fill="none"/>
+            <text x="560" y="338" class="label">写入</text>
+            
+            <!-- P10 → D7：写入 -->
+            <path d="M460,445 L680,445" stroke="#000" stroke-width="1.5" fill="none"/>
+            <text x="560" y="438" class="label">写入</text>
+            
+            <!-- D3 → P8：规则 -->
+            <path d="M680,555 L680,600 L400,600 L400,275" stroke="#000" stroke-width="1.5" fill="none"/>
+            <text x="530" y="610" class="label">入侵规则</text>
+            
+            <!-- P7 → 业务分析员：考勤记录 -->
+            <path d="M460,145 L540,145 L540,302 L1010,302" stroke="#000" stroke-width="1.5" fill="none"/>
+            <text x="760" y="155" class="label">考勤记录</text>
+            
+            <!-- P8 → 业务分析员：安全事件 -->
+            <path d="M460,255 L550,255 L550,315 L1010,315" stroke="#000" stroke-width="1.5" fill="none"/>
+            <text x="760" y="265" class="label">安全事件</text>
+        </svg>
+    </div>
+</body>
+</html>

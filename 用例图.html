@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A-AI智能视频监控系统 - 用例图</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #000;
+            margin-bottom: 30px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .diagram-container {
+            position: relative;
+            width: 1200px;
+            height: 800px;
+            margin: 0 auto;
+            background-image: 
+                linear-gradient(to right, #e0e0e0 1px, transparent 1px),
+                linear-gradient(to bottom, #e0e0e0 1px, transparent 1px);
+            background-size: 20px 20px;
+            border: 1px solid #ccc;
+        }
+        
+        /* 图例样式 */
+        .legend-box {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            width: 180px;
+            border: 1px solid #000;
+            background: #fff;
+            padding: 15px;
+            z-index: 20;
+        }
+        
+        .legend-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            text-align: center;
+            border-bottom: 1px solid #000;
+            padding-bottom: 5px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+        
+        .legend-icon {
+            width: 40px;
+            height: 25px;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* 参与者 - 小人图标 */
+        .actor {
+            position: absolute;
+            text-align: center;
+            z-index: 15;
+        }
+        
+        .actor-icon {
+            width: 35px;
+            height: 55px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        .actor-head {
+            width: 16px;
+            height: 16px;
+            border: 1px solid #000;
+            border-radius: 50%;
+            background: #fff;
+            margin: 0 auto;
+        }
+        
+        .actor-body {
+            width: 18px;
+            height: 22px;
+            border: 1px solid #000;
+            background: #fff;
+            margin: 2px auto 0;
+            border-radius: 9px 9px 0 0;
+        }
+        
+        .actor-legs {
+            width: 18px;
+            height: 12px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        .actor-legs::before,
+        .actor-legs::after {
+            content: '';
+            position: absolute;
+            width: 1px;
+            height: 12px;
+            background: #000;
+            top: 0;
+        }
+        
+        .actor-legs::before { left: 5px; }
+        .actor-legs::after { right: 5px; }
+        
+        .actor-name {
+            font-size: 12px;
+            margin-top: 5px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        
+        /* 用例 - 椭圆 */
+        .use-case {
+            position: absolute;
+            border: 1px solid #000;
+            background: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 500;
+            text-align: center;
+            z-index: 15;
+        }
+        
+        /* 系统边界 - 矩形 */
+        .system-boundary {
+            position: absolute;
+            border: 1px dashed #000;
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .boundary-label {
+            position: absolute;
+            top: 10px;
+            left: 15px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        /* SVG 线条 */
+        svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        .association-line {
+            stroke: #000;
+            stroke-width: 1;
+            fill: none;
+        }
+        
+        .include-line {
+            stroke: #000;
+            stroke-width: 1;
+            stroke-dasharray: 5,5;
+            fill: none;
+            marker-end: url(#arrowhead);
+        }
+        
+        .extend-line {
+            stroke: #000;
+            stroke-width: 1;
+            stroke-dasharray: 5,5;
+            fill: none;
+            marker-end: url(#arrowhead);
+        }
+        
+        .generalization-line {
+            stroke: #000;
+            stroke-width: 1;
+            fill: none;
+            marker-end: url(#arrowhead-triangle);
+        }
+        
+        .line-label {
+            font-size: 10px;
+            fill: #000;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>A-AI智能视频监控系统 - 用例图</h1>
+        
+        <div class="diagram-container">
+            <!-- SVG 层 -->
+            <svg>
+                <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                        <polygon points="0 0, 10 3, 0 6" fill="#000" />
+                    </marker>
+                    <marker id="arrowhead-triangle" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+                        <polygon points="0 0, 12 6, 0 12" fill="none" stroke="#000" stroke-width="1"/>
+                    </marker>
+                </defs>
+            </svg>
+            
+            <!-- 图例 -->
+            <div class="legend-box">
+                <div class="legend-title">图例</div>
+                <div class="legend-item">
+                    <div class="legend-icon">
+                        <div style="width: 16px; height: 16px; border: 1px solid #000; border-radius: 50%; background: #fff;"></div>
+                    </div>
+                    <span>参与者</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon" style="border: 1px solid #000; border-radius: 50%; background: #fff;"></div>
+                    <span>用例</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon" style="border: 1px solid #000; background: #fff;"></div>
+                    <span>系统边界</span>
+                </div>
+                <div class="legend-item">
+                    <div style="width: 30px; height: 2px; background: #000; margin-right: 10px;"></div>
+                    <span>关联</span>
+                </div>
+                <div class="legend-item">
+                    <div style="width: 30px; height: 2px; background: repeating-linear-gradient(to right, #000 0, #000 5px, transparent 5px, transparent 10px); margin-right: 10px;"></div>
+                    <span>包含/扩展</span>
+                </div>
+            </div>
+            
+            <!-- 系统边界 -->
+            <div class="system-boundary" style="left: 150px; top: 50px; width: 900px; height: 700px;">
+                <div class="boundary-label">智能摄像头管理系统</div>
+            </div>
+            
+            <!-- 参与者 -->
+            <div class="actor" id="admin" style="left: 50px; top: 200px;">
+                <div class="actor-icon">
+                    <div class="actor-head"></div>
+                    <div class="actor-body"></div>
+                    <div class="actor-legs"></div>
+                </div>
+                <div class="actor-name">系统管理员</div>
+            </div>
+            
+            <div class="actor" id="operator" style="left: 50px; top: 400px;">
+                <div class="actor-icon">
+                    <div class="actor-head"></div>
+                    <div class="actor-body"></div>
+                    <div class="actor-legs"></div>
+                </div>
+                <div class="actor-name">监控操作员</div>
+            </div>
+            
+            <div class="actor" id="analyst" style="left: 50px; top: 550px;">
+                <div class="actor-icon">
+                    <div class="actor-head"></div>
+                    <div class="actor-body"></div>
+                    <div class="actor-legs"></div>
+                </div>
+                <div class="actor-name">业务分析员</div>
+            </div>
+            
+            <div class="actor" id="camera" style="left: 1050px; top: 300px;">
+                <div class="actor-icon">
+                    <div class="actor-head"></div>
+                    <div class="actor-body"></div>
+                    <div class="actor-legs"></div>
+                </div>
+                <div class="actor-name">摄像头设备</div>
+            </div>
+            
+            <!-- 第一层用例 - 基础管理 -->
+            <div class="use-case" id="uc1" style="left: 200px; top: 150px; width: 120px; height: 60px;">管理摄像头</div>
+            <div class="use-case" id="uc2" style="left: 380px; top: 150px; width: 120px; height: 60px;">管理用户</div>
+            <div class="use-case" id="uc3" style="left: 560px; top: 150px; width: 120px; height: 60px;">管理规则</div>
+            
+            <!-- 第二层用例 - 核心功能 -->
+            <div class="use-case" id="uc4" style="left: 200px; top: 280px; width: 120px; height: 60px;">查看实时监控</div>
+            <div class="use-case" id="uc5" style="left: 380px; top: 280px; width: 120px; height: 60px;">YOLO目标检测</div>
+            <div class="use-case" id="uc6" style="left: 560px; top: 280px; width: 120px; height: 60px;">人脸识别</div>
+            
+            <!-- 第三层用例 - 业务应用 -->
+            <div class="use-case" id="uc7" style="left: 200px; top: 420px; width: 120px; height: 60px;">考勤追踪</div>
+            <div class="use-case" id="uc8" style="left: 380px; top: 420px; width: 120px; height: 60px;">入侵检测</div>
+            <div class="use-case" id="uc9" style="left: 560px; top: 420px; width: 120px; height: 60px;">人流统计</div>
+            <div class="use-case" id="uc10" style="left: 740px; top: 420px; width: 120px; height: 60px;">麻袋计数</div>
+            
+            <!-- 第四层用例 - 查询分析 -->
+            <div class="use-case" id="uc11" style="left: 200px; top: 550px; width: 120px; height: 60px;">查询考勤记录</div>
+            <div class="use-case" id="uc12" style="left: 380px; top: 550px; width: 120px; height: 60px;">AI视觉查询</div>
+            <div class="use-case" id="uc13" style="left: 560px; top: 550px; width: 120px; height: 60px;">系统监控</div>
+            <div class="use-case" id="uc14" style="left: 740px; top: 550px; width: 120px; height: 60px;">接收告警通知</div>
+            
+            <!-- 包含/扩展用例 -->
+            <div class="use-case" id="uc15" style="left: 380px; top: 680px; width: 120px; height: 60px;">验证RTSP流</div>
+            <div class="use-case" id="uc16" style="left: 560px; top: 680px; width: 120px; height: 60px;">提取人脸特征</div>
+        </div>
+    </div>
+    
+    <script>
+        function drawLine(x1, y1, x2, y2, type, label, labelPos) {
+            const svg = document.querySelector('svg');
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', x1);
+            line.setAttribute('y1', y1);
+            line.setAttribute('x2', x2);
+            line.setAttribute('y2', y2);
+            line.setAttribute('class', type);
+            svg.appendChild(line);
+            
+            if (label && labelPos) {
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', labelPos.x);
+                text.setAttribute('y', labelPos.y);
+                text.setAttribute('class', 'line-label');
+                text.setAttribute('text-anchor', 'middle');
+                text.textContent = label;
+                svg.appendChild(text);
+            }
+        }
+        
+        function drawPath(d, type, label, labelPos) {
+            const svg = document.querySelector('svg');
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', d);
+            path.setAttribute('class', type);
+            path.setAttribute('fill', 'none');
+            svg.appendChild(path);
+            
+            if (label && labelPos) {
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', labelPos.x);
+                text.setAttribute('y', labelPos.y);
+                text.setAttribute('class', 'line-label');
+                text.setAttribute('text-anchor', 'middle');
+                text.textContent = label;
+                svg.appendChild(text);
+            }
+        }
+        
+        function drawAllLines() {
+            // === 参与者与用例的关联（实线）===
+            
+            // 系统管理员 → 管理摄像头
+            drawLine(85, 227, 200, 180, 'association-line');
+            
+            // 系统管理员 → 管理用户
+            drawLine(90, 227, 380, 180, 'association-line');
+            
+            // 系统管理员 → 管理规则
+            drawLine(95, 227, 560, 180, 'association-line');
+            
+            // 监控操作员 → 查看实时监控
+            drawLine(85, 427, 200, 310, 'association-line');
+            
+            // 监控操作员 → AI视觉查询
+            drawLine(90, 427, 380, 580, 'association-line');
+            
+            // 监控操作员 → 接收告警通知
+            drawLine(95, 427, 740, 580, 'association-line');
+            
+            // 业务分析员 → 查询考勤记录
+            drawLine(85, 577, 200, 580, 'association-line');
+            
+            // 业务分析员 → 系统监控
+            drawLine(90, 577, 560, 580, 'association-line');
+            
+            // 摄像头设备 → YOLO目标检测
+            drawLine(1050, 355, 500, 310, 'association-line');
+            
+            // 摄像头设备 → 人脸识别
+            drawLine(1045, 355, 620, 310, 'association-line');
+            
+            
+            // === 用例之间的包含关系（虚线箭头，<<include>>）===
+            
+            // 管理摄像头 <<include>> 验证RTSP流
+            drawPath('M 260 210 L 260 250 L 440 250 L 440 680', 'include-line', '<<include>>', {x: 350, y: 245});
+            
+            // 管理用户 <<include>> 提取人脸特征
+            drawPath('M 440 210 L 440 240 L 620 240 L 620 680', 'include-line', '<<include>>', {x: 530, y: 235});
+            
+            // 查看实时监控 <<include>> YOLO目标检测
+            drawPath('M 260 340 L 260 360 L 320 360 L 320 340', 'include-line', '<<include>>', {x: 290, y: 355});
+            
+            // YOLO目标检测 <<include>> 人脸识别
+            drawLine(500, 310, 560, 310, 'include-line', '<<include>>', {x: 530, y: 305});
+            
+            // 人脸识别 <<include>> 考勤追踪
+            drawPath('M 620 340 L 620 400 L 320 400 L 320 420', 'include-line', '<<include>>', {x: 470, y: 395});
+            
+            // 人脸识别 <<include>> 入侵检测
+            drawPath('M 640 340 L 640 380 L 500 380 L 500 420', 'include-line', '<<include>>', {x: 570, y: 375});
+            
+            // YOLO目标检测 <<include>> 人流统计
+            drawPath('M 320 340 L 320 390 L 620 390 L 620 420', 'include-line', '<<include>>', {x: 470, y: 385});
+            
+            // YOLO目标检测 <<include>> 麻袋计数
+            drawPath('M 320 340 L 320 370 L 800 370 L 800 420', 'include-line', '<<include>>', {x: 560, y: 365});
+            
+            
+            // === 用例之间的扩展关系（虚线箭头，<<extend>>）===
+            
+            // 考勤追踪 <<extend>> 查询考勤记录
+            drawPath('M 260 480 L 260 520 L 260 520 L 260 550', 'extend-line', '<<extend>>', {x: 290, y: 515});
+            
+            // 入侵检测 <<extend>> 接收告警通知
+            drawPath('M 500 480 L 500 520 L 800 520 L 800 550', 'extend-line', '<<extend>>', {x: 650, y: 515});
+            
+            
+            // === 管理规则与其他用例的关系 ===
+            
+            // 管理规则 → 入侵检测（规则配置）
+            drawPath('M 620 210 L 680 210 L 680 450 L 500 450', 'association-line');
+        }
+        
+        window.addEventListener('load', drawAllLines);
+    </script>
+</body>
+</html>

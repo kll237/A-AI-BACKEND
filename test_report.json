@@ -1,0 +1,360 @@
+{
+  "test_time": "2025-12-11 09:05:11",
+  "config": {
+    "test_cases": {
+      "local_camera": [
+        {
+          "type": "camera",
+          "source": 0,
+          "name": "笔记本摄像头",
+          "description": "主摄像头测试"
+        },
+        {
+          "type": "camera",
+          "source": 1,
+          "name": "外接摄像头",
+          "description": "副摄像头测试"
+        }
+      ],
+      "video_files": [
+        {
+          "type": "file",
+          "source": "test_videos/1.mp4",
+          "name": "高清测试视频",
+          "description": "1920x1080 高清视频"
+        },
+        {
+          "type": "file",
+          "source": "test_videos/2.mp4",
+          "name": "标清测试视频",
+          "description": "640x480 标清视频"
+        },
+        {
+          "type": "file",
+          "source": "test_videos/broken.mp4",
+          "name": "损坏视频文件",
+          "description": "用于测试错误处理"
+        }
+      ],
+      "network_streams": [
+        {
+          "type": "rtsp",
+          "source": "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov",
+          "name": "公共RTSP测试流",
+          "description": "公开可用的RTSP流"
+        },
+        {
+          "type": "http",
+          "source": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
+          "name": "HTTP MP4流",
+          "description": "Google测试视频流"
+        },
+        {
+          "type": "rtsp",
+          "source": "rtsp://192.168.1.100:554/stream1",
+          "name": "模拟本地RTSP",
+          "description": "模拟本地网络摄像头RTSP流"
+        }
+      ]
+    },
+    "test_parameters": {
+      "test_duration": 15,
+      "reconnect_attempts": 3,
+      "reconnect_delay": 2,
+      "frame_rate_target": 30,
+      "resolution_scale": 0.5,
+      "timeout": 10,
+      "performance_threshold": 15,
+      "buffer_size": 10,
+      "max_frame_skip": 5,
+      "enable_hardware_acceleration": true
+    },
+    "report_settings": {
+      "save_report": true,
+      "report_format": "json",
+      "generate_summary": true,
+      "log_level": "INFO"
+    }
+  },
+  "results": {
+    "local_camera": [
+      {
+        "name": "外接摄像头",
+        "type": "camera",
+        "source": "1",
+        "success": false,
+        "details": {
+          "message": "无法打开视频源"
+        }
+      },
+      {
+        "name": "笔记本摄像头",
+        "type": "camera",
+        "source": "0",
+        "success": true,
+        "details": {
+          "type": "camera",
+          "fps": "未知",
+          "resolution": "640x480",
+          "connect_time": "1.14s",
+          "frame_sample": "有效"
+        }
+      }
+    ],
+    "video_files": [
+      {
+        "name": "损坏视频文件",
+        "type": "file",
+        "source": "test_videos/broken.mp4",
+        "success": false,
+        "details": {
+          "message": "文件不存在: test_videos/broken.mp4"
+        }
+      },
+      {
+        "name": "标清测试视频",
+        "type": "file",
+        "source": "test_videos/2.mp4",
+        "success": true,
+        "details": {
+          "type": "file",
+          "fps": 23.976023976023978,
+          "resolution": "1920x1080",
+          "connect_time": "0.12s",
+          "frame_sample": "有效"
+        }
+      },
+      {
+        "name": "高清测试视频",
+        "type": "file",
+        "source": "test_videos/1.mp4",
+        "success": true,
+        "details": {
+          "type": "file",
+          "fps": 23.976023976023978,
+          "resolution": "1920x1080",
+          "connect_time": "0.12s",
+          "frame_sample": "有效"
+        }
+      }
+    ],
+    "network_streams": [
+      {
+        "name": "公共RTSP测试流",
+        "type": "rtsp",
+        "source": "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov",
+        "success": false,
+        "details": {
+          "message": "无法打开视频源"
+        }
+      },
+      {
+        "name": "模拟本地RTSP",
+        "type": "rtsp",
+        "source": "rtsp://192.168.1.100:554/stream1",
+        "success": false,
+        "details": {
+          "message": "无法打开视频源"
+        }
+      },
+      {
+        "name": "HTTP MP4流",
+        "type": "http",
+        "source": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
+        "success": false,
+        "details": {
+          "message": "无法打开视频源"
+        }
+      }
+    ],
+    "reconnect": [
+      {
+        "name": "公共RTSP测试流",
+        "type": "rtsp",
+        "source": "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov",
+        "success": false,
+        "details": {
+          "message": "重连失败 (3 次尝试): 无法打开视频源"
+        }
+      },
+      {
+        "name": "模拟本地RTSP",
+        "type": "rtsp",
+        "source": "rtsp://192.168.1.100:554/stream1",
+        "success": false,
+        "details": {
+          "message": "重连失败 (3 次尝试): 无法打开视频源"
+        }
+      },
+      {
+        "name": "HTTP MP4流",
+        "type": "http",
+        "source": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
+        "success": false,
+        "details": {
+          "message": "重连失败 (3 次尝试): 无法打开视频源"
+        }
+      }
+    ],
+    "performance": [
+      {
+        "name": "外接摄像头",
+        "type": "camera",
+        "source": "1",
+        "success": false,
+        "details": {
+          "message": "无法打开视频源"
+        }
+      },
+      {
+        "name": "标清测试视频",
+        "type": "file",
+        "source": "test_videos/2.mp4",
+        "success": true,
+        "details": {
+          "status": "✓ 通过",
+          "avg_fps": "81.7",
+          "target_fps": 30,
+          "threshold_fps": 15,
+          "total_frames": 230,
+          "total_time": "2.8s",
+          "optimizations": [
+            "分辨率缩放: 0.5倍 (960x540)",
+            "硬件加速: 启用"
+          ],
+          "fps_history": [
+            81.29073533757966,
+            81.3581787716458,
+            81.38363185664407,
+            81.45970098163575,
+            81.51145214869223,
+            81.58250062892303,
+            81.61687907958165,
+            81.67482021614289,
+            81.70322666696609,
+            81.73922415473116
+          ],
+          "resolution_samples": [
+            [
+              1080,
+              1920
+            ]
+          ]
+        }
+      },
+      {
+        "name": "高清测试视频",
+        "type": "file",
+        "source": "test_videos/1.mp4",
+        "success": true,
+        "details": {
+          "status": "✓ 通过",
+          "avg_fps": "83.9",
+          "target_fps": 30,
+          "threshold_fps": 15,
+          "total_frames": 256,
+          "total_time": "3.1s",
+          "optimizations": [
+            "分辨率缩放: 0.5倍 (960x540)",
+            "硬件加速: 启用"
+          ],
+          "fps_history": [
+            82.60936069177987,
+            82.75018028731891,
+            82.86263658709763,
+            82.99407298263432,
+            83.1601482295623,
+            83.29795019498441,
+            83.49051973759421,
+            83.63915351010175,
+            83.7697090911825,
+            83.90521432192232
+          ],
+          "resolution_samples": [
+            [
+              1080,
+              1920
+            ]
+          ]
+        }
+      },
+      {
+        "name": "笔记本摄像头",
+        "type": "camera",
+        "source": "0",
+        "success": false,
+        "details": {
+          "status": "✗ 未达标",
+          "avg_fps": "14.3",
+          "target_fps": 30,
+          "threshold_fps": 15,
+          "total_frames": 216,
+          "total_time": "15.1s",
+          "optimizations": [
+            "分辨率缩放: 0.5倍 (320x240)",
+            "硬件加速: 启用"
+          ],
+          "fps_history": [
+            14.306439210641717,
+            14.320204120735859,
+            14.327309663532857,
+            14.332745972109945,
+            14.329847783503881,
+            14.329705307558747,
+            14.335162513716206,
+            14.339066066820116,
+            14.3444596867993,
+            14.348705328874232
+          ],
+          "resolution_samples": [
+            [
+              240,
+              320
+            ]
+          ]
+        }
+      },
+      {
+        "name": "损坏视频文件",
+        "type": "file",
+        "source": "test_videos/broken.mp4",
+        "success": false,
+        "details": {
+          "message": "无法打开视频源"
+        }
+      },
+      {
+        "name": "公共RTSP测试流",
+        "type": "rtsp",
+        "source": "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov",
+        "success": false,
+        "details": {
+          "message": "无法打开视频源"
+        }
+      },
+      {
+        "name": "模拟本地RTSP",
+        "type": "rtsp",
+        "source": "rtsp://192.168.1.100:554/stream1",
+        "success": false,
+        "details": {
+          "message": "无法打开视频源"
+        }
+      },
+      {
+        "name": "HTTP MP4流",
+        "type": "http",
+        "source": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
+        "success": false,
+        "details": {
+          "message": "无法打开视频源"
+        }
+      }
+    ]
+  },
+  "summary": {
+    "total_tests": 19,
+    "successful": 5,
+    "failed": 14
+  }
+}

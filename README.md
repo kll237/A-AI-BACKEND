@@ -181,7 +181,7 @@ sequenceDiagram
 
 ### 1. Clone & Setup
 ```bash
-git clone https://github.com/rudra-sah00/A-AI-BACKEND.git
+git clone https://github.com/kll237/A-AI-BACKEND.git
 cd A-AI-BACKEND
 
 # Create virtual environment
@@ -232,7 +232,7 @@ sudo apt install -y libgl1-mesa-glx libglib2.0-0 libsm6 libxext6 libxrender-dev
 sudo apt install -y ffmpeg libavcodec-dev libavformat-dev libswscale-dev
 
 # Clone and setup
-git clone https://github.com/rudra-sah00/A-AI-BACKEND.git
+git clone https://github.com/kll237/A-AI-BACKEND.git
 cd A-AI-BACKEND
 python3 -m venv venv
 source venv/bin/activate
@@ -253,7 +253,7 @@ pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
 brew install python@3.11 ffmpeg opencv
 
 # Clone and setup
-git clone https://github.com/rudra-sah00/A-AI-BACKEND.git
+git clone https://github.com/kll237/A-AI-BACKEND.git
 cd A-AI-BACKEND
 python3 -m venv venv
 source venv/bin/activate
@@ -268,7 +268,7 @@ pip install -r requirements.txt
 # Install Git from git-scm.com
 
 # Clone and setup
-git clone https://github.com/rudra-sah00/A-AI-BACKEND.git
+git clone https://github.com/kll237/A-AI-BACKEND.git
 cd A-AI-BACKEND
 python -m venv venv
 venv\Scripts\activate
@@ -1142,7 +1142,7 @@ aws ec2 run-instances \
 # Setup instance
 ssh -i your-key.pem ubuntu@your-instance-ip
 sudo apt update && sudo apt install -y docker.io nvidia-docker2
-git clone https://github.com/rudra-sah00/A-AI-BACKEND.git
+git clone https://github.com/kll237/A-AI-BACKEND.git
 cd A-AI-BACKEND
 docker-compose up -d
 ```
@@ -1344,7 +1344,7 @@ websocat ws://localhost:8000/ws
 
 ### 🏆 **Contributors**
 
-- **Rudra Sah** - *Initial work* - [@rudra-sah00](https://github.com/rudra-sah00)
+- **kll237** - *Initial work* - [@kll237](https://github.com/kll237)
 
 ---
 
@@ -1368,22 +1368,26 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ### 🆘 **Getting Help**
 
-- **Issues**: [GitHub Issues](https://github.com/rudra-sah00/A-AI-BACKEND/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/rudra-sah00/A-AI-BACKEND/discussions)
-- **Email**: rudra.sah00@example.com
+- **Issues**: [GitHub Issues](https://github.com/kll237/A-AI-BACKEND/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/kll237/A-AI-BACKEND/discussions)
+- **Email**: 联系GitHub仓库所有者
 
 ### 📱 **Social Media**
 
-- **LinkedIn**: [Rudra Sah](https://linkedin.com/in/rudra-sah)
-- **Twitter**: [@rudra_sah00](https://twitter.com/rudra_sah00)
+- **LinkedIn**: [Your LinkedIn](https://linkedin.com/in/your-profile)
+- **Twitter**: [@your-twitter](https://twitter.com/your-twitter)
+
+---
+
+**中文文档**: [README_CN.md](README_CN.md)
 
 ---
 
 <div align="center">
 
-### 🌟 Star this repository if it helped you!
+### Star this repository if it helped you!
 
-**Made with ❤️ for the Andhra Pradesh Government Hackathon**
+**Made with ❤️ for AI智能视频监控系统**
 
 [⬆ Back to Top](#-ai-powered-security--analytics-backend)
 

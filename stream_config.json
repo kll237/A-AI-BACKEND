@@ -1,0 +1,63 @@
+{
+    "display_settings": {
+        "show_detection": true,
+        "show_tracking": true,
+        "show_faces": true,
+        "show_heatmap": false,
+        "show_statistics": true,
+        "show_timeline": true,
+        "show_grid": false,
+        "transparency": 0.3
+    },
+    "visual_style": {
+        "box_thickness": 2,
+        "tracking_line_width": 2,
+        "font_scale": 0.6,
+        "font_thickness": 1,
+        "heatmap_opacity": 0.5,
+        "alert_duration": 3
+    },
+    "demo_modes": {
+        "object_detection": {
+            "enabled": true,
+            "classes": ["person", "car", "bicycle", "dog", "cat", "chair", "bag"],
+            "confidence_threshold": 0.5
+        },
+        "face_recognition": {
+            "enabled": true,
+            "show_landmarks": true,
+            "show_emotion": true,
+            "show_age_gender": false
+        },
+        "object_tracking": {
+            "enabled": true,
+            "track_history_length": 20,
+            "min_track_length": 5
+        },
+        "crowd_counting": {
+            "enabled": true,
+            "show_count": true,
+            "show_density": true,
+            "counting_zones": []
+        },
+        "behavior_analysis": {
+            "enabled": false,
+            "detect_actions": ["walking", "running", "falling", "fighting"]
+        },
+        "intrusion_detection": {
+            "enabled": true,
+            "regions_of_interest": [],
+            "alert_sound": false
+        },
+        "heatmap_analysis": {
+            "enabled": false,
+            "accumulation_time": 60,
+            "color_scheme": "jet"
+        },
+        "vehicle_analysis": {
+            "enabled": false,
+            "vehicle_types": ["car", "truck", "bus", "motorcycle"],
+            "count_in_each_lane": false
+        }
+    }
+}

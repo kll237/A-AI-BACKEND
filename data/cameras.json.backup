@@ -1,0 +1,117 @@
+{
+  "5f66baed-2889-481b-b801-86339034b3fa": {
+    "id": "5f66baed-2889-481b-b801-86339034b3fa",
+    "name": "Corridor Camera",
+    "rtsp_url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+    "created_at": "2025-05-09T19:53:42.910959",
+    "updated_at": "2025-12-10T20:30:00.000000",
+    "filters": [
+      {
+        "filter_id": "authorizedentry-4b8f",
+        "filter_name": "authorized_entry",
+        "enabled": true
+      }
+    ],
+    "is_active": true,
+    "stream_status": true,
+    "validation_result": {
+      "is_valid": true,
+      "frames_read": 5,
+      "validation_time": 1.5
+    }
+  },
+  "19b14fd5-6fe6-4cc1-8af2-f78ead10a818": {
+    "id": "19b14fd5-6fe6-4cc1-8af2-f78ead10a818",
+    "name": "Back Camera",
+    "rtsp_url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+    "created_at": "2025-05-09T19:56:01.917375",
+    "updated_at": "2025-12-10T20:30:00.000000",
+    "filters": [
+      {
+        "filter_id": "ollamavision-2lkz",
+        "filter_name": "OllamaVision",
+        "enabled": true
+      }
+    ],
+    "is_active": true,
+    "stream_status": true,
+    "validation_result": {
+      "is_valid": true,
+      "frames_read": 5,
+      "validation_time": 1.2
+    }
+  },
+  "1ea989cb-fe5e-4b08-9a46-3c785198d9a9": {
+    "id": "1ea989cb-fe5e-4b08-9a46-3c785198d9a9",
+    "name": "Front Main Road Camera",
+    "rtsp_url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
+    "created_at": "2025-05-09T19:56:29.234883",
+    "updated_at": "2025-12-10T20:30:00.000000",
+    "filters": [
+      {
+        "filter_id": "ollamavision-36l4",
+        "filter_name": "OllamaVision",
+        "enabled": true
+      }
+    ],
+    "is_active": true,
+    "stream_status": true,
+    "validation_result": {
+      "is_valid": true,
+      "frames_read": 5,
+      "validation_time": 1.0
+    }
+  },
+  "test-camera-local": {
+    "id": "test-camera-local",
+    "name": "Local Test Camera",
+    "rtsp_url": "D:/jsjxm/A-AI-BACKEND/test_video.mp4",
+    "created_at": "2025-12-10T16:30:00.000000",
+    "updated_at": "2025-12-10T20:30:00.000000",
+    "filters": [
+      {
+        "filter_id": "animal-1",
+        "filter_name": "动物检测",
+        "enabled": true
+      },
+      {
+        "filter_id": "vehicle-1",
+        "filter_name": "车辆检测",
+        "enabled": true
+      }
+    ],
+    "is_active": true,
+    "stream_status": true,
+    "validation_result": {
+      "is_valid": true,
+      "frames_read": 5,
+      "validation_time": 1.0
+    }
+  },
+  "computer-webcam": {
+    "id": "computer-webcam",
+    "name": "电脑前置摄像头",
+    "rtsp_url": "0",
+    "created_at": "2025-12-10T20:30:00.000000",
+    "updated_at": "2025-12-10T20:30:00.000000",
+    "filters": [
+      {
+        "filter_id": "ollamavision-webcam",
+        "filter_name": "OllamaVision",
+        "enabled": true
+      },
+      {
+        "filter_id": "attendance-1",
+        "filter_name": "出席",
+        "enabled": true
+      }
+    ],
+    "is_active": false,
+    "stream_status": true,
+    "validation_result": {
+      "is_valid": true,
+      "frames_read": 5,
+      "validation_time": 1.0
+    }
+  }
+}

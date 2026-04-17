@@ -1,7 +1,15 @@
-# AI Engine initialization
+﻿"""
+AI Engine Module
+"""
+import logging
 from .engine import AIEngine
 
-# Create a singleton instance
+logger = logging.getLogger(__name__)
+
+# 创建全局实例
 ai_engine = AIEngine()
 
-__all__ = ['ai_engine']
+# 导出
+__all__ = ['AIEngine', 'ai_engine']
+
+logger.info("AI Engine模块加载完成")

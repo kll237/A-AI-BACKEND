@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A-AI智能视频监控系统 - 类图</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            background-color: #fff;
+            padding: 20px;
+        }
+        .container {
+            width: 1400px;
+            height: 800px;
+            margin: 0 auto;
+            position: relative;
+            background-image: 
+                linear-gradient(to right, #e0e0e0 1px, transparent 1px),
+                linear-gradient(to bottom, #e0e0e0 1px, transparent 1px);
+            background-size: 20px 20px;
+            border: 1px solid #333;
+        }
+        .title {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #000;
+            z-index: 100;
+        }
+        .legend {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 12px;
+            color: #000;
+            z-index: 100;
+            background: rgba(255,255,255,0.9);
+            padding: 10px;
+            border: 1px solid #333;
+        }
+        .legend-item {
+            margin: 5px 0;
+            display: flex;
+            align-items: center;
+        }
+        .legend-box {
+            width: 40px;
+            height: 20px;
+            border: 1px solid #000;
+            margin-right: 10px;
+        }
+        .legend-line {
+            width: 40px;
+            height: 0;
+            border-top: 1.5px solid #000;
+            margin-right: 10px;
+        }
+        .legend-dashed {
+            width: 40px;
+            height: 0;
+            border-top: 1px dashed #000;
+            margin-right: 10px;
+        }
+        .legend-diamond {
+            width: 12px;
+            height: 12px;
+            border: 1px solid #000;
+            transform: rotate(45deg);
+            margin-right: 18px;
+            margin-left: 4px;
+            background: #fff;
+        }
+        .class {
+            position: absolute;
+            width: 150px;
+            border: 1px solid #000;
+            background: #fff;
+            z-index: 10;
+        }
+        .class-name {
+            text-align: center;
+            font-weight: bold;
+            padding: 8px;
+            border-bottom: 1px solid #000;
+            font-size: 14px;
+            background: #f5f5f5;
+        }
+        .class-attributes {
+            padding: 8px;
+            font-size: 12px;
+            border-bottom: 1px solid #000;
+            min-height: 55px;
+        }
+        .class-attributes div {
+            margin: 2px 0;
+        }
+        .class-methods {
+            padding: 8px;
+            font-size: 12px;
+            min-height: 35px;
+        }
+        .class-methods div {
+            margin: 2px 0;
+        }
+        .svg-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+        }
+        .multiplicity {
+            font-size: 10px;
+            fill: #000;
+        }
+        .relation-name {
+            font-size: 11px;
+            fill: #000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">A-AI智能视频监控系统 类图（概念层）</div>
+        
+        <div class="legend">
+            <div style="font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 5px;">图例</div>
+            <div class="legend-item">
+                <div class="legend-box"></div>
+                <span>类</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-line"></div>
+                <span>关联关系</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dashed"></div>
+                <span>依赖关系</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-diamond"></div>
+                <span>聚合关系</span>
+            </div>
+        </div>
+        
+        <!-- 第一行：用户、摄像头、规则、检测引擎、监控界面 -->
+        <div class="class" id="user" style="left: 80px; top: 120px;">
+            <div class="class-name">用户</div>
+            <div class="class-attributes">
+                <div>用户ID</div>
+                <div>用户名</div>
+                <div>角色</div>
+                <div>人脸特征</div>
+            </div>
+            <div class="class-methods">
+                <div>登录系统()</div>
+            </div>
+        </div>
+        
+        <div class="class" id="camera" style="left: 300px; top: 120px;">
+            <div class="class-name">摄像头</div>
+            <div class="class-attributes">
+                <div>摄像头ID</div>
+                <div>摄像头名称</div>
+                <div>RTSP地址</div>
+                <div>状态</div>
+            </div>
+            <div class="class-methods">
+                <div>连接()</div>
+            </div>
+        </div>
+        
+        <div class="class" id="rule" style="left: 520px; top: 120px;">
+            <div class="class-name">规则</div>
+            <div class="class-attributes">
+                <div>规则ID</div>
+                <div>事件类型</div>
+                <div>触发条件</div>
+                <div>启用状态</div>
+            </div>
+            <div class="class-methods">
+                <div>启用()</div>
+            </div>
+        </div>
+        
+        <div class="class" id="detector" style="left: 740px; top: 120px;">
+            <div class="class-name">检测引擎</div>
+            <div class="class-attributes">
+                <div>模型类型</div>
+                <div>置信度阈值</div>
+            </div>
+            <div class="class-methods">
+                <div>目标检测()</div>
+            </div>
+        </div>
+        
+        <div class="class" id="monitor" style="left: 960px; top: 120px;">
+            <div class="class-name">监控界面</div>
+            <div class="class-attributes">
+                <div>界面ID</div>
+                <div>显示模式</div>
+            </div>
+            <div class="class-methods">
+                <div>显示视频()</div>
+            </div>
+        </div>
+        
+        <!-- 第二行：考勤记录、安全事件、人流数据、告警服务 -->
+        <div class="class" id="attendance" style="left: 80px; top: 400px;">
+            <div class="class-name">考勤记录</div>
+            <div class="class-attributes">
+                <div>记录ID</div>
+                <div>用户ID</div>
+                <div>时间戳</div>
+                <div>事件类型</div>
+            </div>
+            <div class="class-methods">
+                <div>生成记录()</div>
+            </div>
+        </div>
+        
+        <div class="class" id="security" style="left: 300px; top: 400px;">
+            <div class="class-name">安全事件</div>
+            <div class="class-attributes">
+                <div>事件ID</div>
+                <div>事件类型</div>
+                <div>时间戳</div>
+                <div>截图URL</div>
+            </div>
+            <div class="class-methods">
+                <div>触发告警()</div>
+            </div>
+        </div>
+        
+        <div class="class" id="crowd" style="left: 520px; top: 400px;">
+            <div class="class-name">人流数据</div>
+            <div class="class-attributes">
+                <div>记录ID</div>
+                <div>区域ID</div>
+                <div>人员数量</div>
+                <div>密度等级</div>
+            </div>
+            <div class="class-methods">
+                <div>统计分析()</div>
+            </div>
+        </div>
+        
+        <div class="class" id="alarm" style="left: 740px; top: 400px;">
+            <div class="class-name">告警服务</div>
+            <div class="class-attributes">
+                <div>告警类型</div>
+                <div>接收者</div>
+            </div>
+            <div class="class-methods">
+                <div>发送告警()</div>
+            </div>
+        </div>
+        
+        <!-- SVG连接线 -->
+        <svg class="svg-layer">
+            <defs>
+                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#000"/>
+                </marker>
+            </defs>
+            
+            <!-- 用户 → 摄像头：管理 -->
+            <line x1="230" y1="180" x2="300" y2="180" stroke="#000" stroke-width="1.5"/>
+            <text x="250" y="172" class="relation-name">管理</text>
+            <text x="232" y="192" class="multiplicity">1</text>
+            <text x="285" y="192" class="multiplicity">n</text>
+            
+            <!-- 用户 → 规则：配置 -->
+            <line x1="230" y1="195" x2="260" y2="195" stroke="#000" stroke-width="1.5"/>
+            <line x1="260" y1="195" x2="260" y2="240" stroke="#000" stroke-width="1.5"/>
+            <line x1="260" y1="240" x2="520" y2="240" stroke="#000" stroke-width="1.5"/>
+            <line x1="520" y1="240" x2="520" y2="220" stroke="#000" stroke-width="1.5"/>
+            <text x="380" y="233" class="relation-name">配置</text>
+            <text x="232" y="207" class="multiplicity">1</text>
+            <text x="525" y="235" class="multiplicity">n</text>
+            
+            <!-- 摄像头 → 检测引擎：提供视频流（依赖） -->
+            <line x1="450" y1="180" x2="740" y2="180" stroke="#000" stroke-width="1" stroke-dasharray="6,3"/>
+            <text x="570" y="172" class="relation-name">提供视频流</text>
+            
+            <!-- 检测引擎 → 监控界面：输出结果（依赖） -->
+            <line x1="890" y1="180" x2="960" y2="180" stroke="#000" stroke-width="1" stroke-dasharray="6,3"/>
+            <text x="897" y="172" class="relation-name">输出结果</text>
+            
+            <!-- 用户 → 考勤记录：识别 -->
+            <line x1="155" y1="220" x2="155" y2="400" stroke="#000" stroke-width="1.5"/>
+            <text x="120" y="315" class="relation-name">识别</text>
+            <text x="160" y="235" class="multiplicity">1</text>
+            <text x="160" y="395" class="multiplicity">n</text>
+            
+            <!-- 摄像头 → 安全事件：触发 -->
+            <line x1="375" y1="220" x2="375" y2="400" stroke="#000" stroke-width="1.5"/>
+            <text x="385" y="315" class="relation-name">触发</text>
+            <text x="380" y="235" class="multiplicity">1</text>
+            <text x="380" y="395" class="multiplicity">n</text>
+            
+            <!-- 规则 → 安全事件：检测 -->
+            <line x1="595" y1="220" x2="595" y2="280" stroke="#000" stroke-width="1.5"/>
+            <line x1="595" y1="280" x2="450" y2="280" stroke="#000" stroke-width="1.5"/>
+            <line x1="450" y1="280" x2="450" y2="400" stroke="#000" stroke-width="1.5"/>
+            <text x="515" y="273" class="relation-name">检测</text>
+            <text x="600" y="235" class="multiplicity">1</text>
+            <text x="455" y="395" class="multiplicity">n</text>
+            
+            <!-- 摄像头 → 人流数据：统计 -->
+            <line x1="450" y1="195" x2="480" y2="195" stroke="#000" stroke-width="1.5"/>
+            <line x1="480" y1="195" x2="480" y2="340" stroke="#000" stroke-width="1.5"/>
+            <line x1="480" y1="340" x2="595" y2="340" stroke="#000" stroke-width="1.5"/>
+            <line x1="595" y1="340" x2="595" y2="400" stroke="#000" stroke-width="1.5"/>
+            <text x="525" y="333" class="relation-name">统计</text>
+            <text x="455" y="207" class="multiplicity">1</text>
+            <text x="600" y="395" class="multiplicity">n</text>
+            
+            <!-- 安全事件 → 告警服务：触发告警（依赖） -->
+            <line x1="450" y1="470" x2="740" y2="470" stroke="#000" stroke-width="1" stroke-dasharray="6,3"/>
+            <text x="560" y="462" class="relation-name">触发告警</text>
+            
+            <!-- 告警服务 → 监控界面：显示（依赖） -->
+            <line x1="890" y1="450" x2="1035" y2="450" stroke="#000" stroke-width="1" stroke-dasharray="6,3"/>
+            <line x1="1035" y1="450" x2="1035" y2="220" stroke="#000" stroke-width="1" stroke-dasharray="6,3"/>
+            <text x="940" y="442" class="relation-name">显示</text>
+            
+            <!-- 检测引擎 ◇→ 人流数据：聚合 -->
+            <line x1="815" y1="220" x2="815" y2="310" stroke="#000" stroke-width="1.5"/>
+            <line x1="815" y1="310" x2="595" y2="310" stroke="#000" stroke-width="1.5"/>
+            <line x1="595" y1="310" x2="595" y2="400" stroke="#000" stroke-width="1.5"/>
+            <polygon points="595,400 600,390 595,380 590,390" fill="#fff" stroke="#000" stroke-width="1"/>
+            <text x="720" y="303" class="relation-name">聚合</text>
+            <text x="820" y="250" class="multiplicity">1</text>
+            <text x="600" y="415" class="multiplicity">*</text>
+        </svg>
+        
+        <!-- 分类标签 -->
+        <div style="position: absolute; left: 30px; top: 160px; font-size: 12px; color: #666; writing-mode: vertical-rl;">实体类</div>
+        <div style="position: absolute; left: 30px; top: 440px; font-size: 12px; color: #666; writing-mode: vertical-rl;">记录类</div>
+        <div style="position: absolute; left: 1130px; top: 160px; font-size: 12px; color: #666; writing-mode: vertical-rl;">边界类</div>
+        <div style="position: absolute; left: 870px; top: 440px; font-size: 12px; color: #666; writing-mode: vertical-rl;">控制类</div>
+    </div>
+</body>
+</html>

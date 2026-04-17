@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A-AI智能视频监控系统 - 功能模块图</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .title h1 {
+            color: white;
+            font-size: 36px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            padding: 20px 40px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 15px;
+            display: inline-block;
+            backdrop-filter: blur(10px);
+        }
+
+        .system-box {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            text-align: center;
+            padding: 30px 50px;
+            border-radius: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 40px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .connection-line {
+            width: 4px;
+            height: 60px;
+            background: rgba(255,255,255,0.5);
+            margin: 0 auto 20px;
+        }
+
+        .modules-container {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .module-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .module-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+        }
+
+        .module-header {
+            padding: 20px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .module-card:nth-child(1) .module-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .module-card:nth-child(2) .module-header { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .module-card:nth-child(3) .module-header { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .module-card:nth-child(4) .module-header { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .module-card:nth-child(5) .module-header { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .module-card:nth-child(6) .module-header { background: linear-gradient(135deg, #f857a6 0%, #ff5858 100%); }
+        .module-card:nth-child(7) .module-header { background: linear-gradient(135deg, #4e54c8 0%, #8f94fb 100%); }
+
+        .module-body {
+            padding: 15px;
+            background: #f8f9fa;
+        }
+
+        .module-item {
+            background: white;
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #333;
+            border-left: 3px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .module-item:hover {
+            background: #e9ecef;
+            border-left-width: 5px;
+        }
+
+        .module-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .module-card:nth-child(1) .module-item { border-left-color: #764ba2; }
+        .module-card:nth-child(2) .module-item { border-left-color: #f5576c; }
+        .module-card:nth-child(3) .module-item { border-left-color: #00f2fe; }
+        .module-card:nth-child(4) .module-item { border-left-color: #38f9d7; }
+        .module-card:nth-child(5) .module-item { border-left-color: #fee140; }
+        .module-card:nth-child(6) .module-item { border-left-color: #ff5858; }
+        .module-card:nth-child(7) .module-item { border-left-color: #8f94fb; }
+
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            color: white;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .legend {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 40px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .legend h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 20px;
+        }
+
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .legend-color {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .legend-text h4 {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 3px;
+        }
+
+        .legend-text p {
+            font-size: 13px;
+            color: #666;
+        }
+
+        @media (max-width: 1200px) {
+            .modules-container {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .modules-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .title h1 {
+                font-size: 24px;
+            }
+            
+            .system-box {
+                font-size: 20px;
+                padding: 20px 30px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .modules-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">
+            <h1>图 3.1 A-AI智能视频监控系统总体功能模块图</h1>
+        </div>
+
+        <div class="system-box">A-AI智能视频监控系统</div>
+        <div class="connection-line"></div>
+
+        <div class="modules-container">
+            <!-- 摄像头管理 -->
+            <div class="module-card">
+                <div class="module-header">摄像头管理</div>
+                <div class="module-body">
+                    <div class="module-item">· 添加摄像头</div>
+                    <div class="module-item">· 删除摄像头</div>
+                    <div class="module-item">· 更新摄像头</div>
+                    <div class="module-item">· 摄像头列表</div>
+                    <div class="module-item">· RTSP流验证</div>
+                </div>
+            </div>
+
+            <!-- 用户管理 -->
+            <div class="module-card">
+                <div class="module-header">用户管理</div>
+                <div class="module-body">
+                    <div class="module-item">· 添加用户</div>
+                    <div class="module-item">· 删除用户</div>
+                    <div class="module-item">· 更新用户</div>
+                    <div class="module-item">· 用户列表</div>
+                    <div class="module-item">· 人脸特征录入</div>
+                </div>
+            </div>
+
+            <!-- 规则管理 -->
+            <div class="module-card">
+                <div class="module-header">规则管理</div>
+                <div class="module-body">
+                    <div class="module-item">· 创建规则</div>
+                    <div class="module-item">· 更新规则</div>
+                    <div class="module-item">· 删除规则</div>
+                    <div class="module-item">· 启用/禁用规则</div>
+                    <div class="module-item">· 规则列表</div>
+                </div>
+            </div>
+
+            <!-- AI智能分析 -->
+            <div class="module-card">
+                <div class="module-header">AI智能分析</div>
+                <div class="module-body">
+                    <div class="module-item">· YOLO目标检测</div>
+                    <div class="module-item">· 人脸识别</div>
+                    <div class="module-item">· AI视觉查询</div>
+                    <div class="module-item">· 场景分析</div>
+                    <div class="module-item">· 麻袋计数</div>
+                </div>
+            </div>
+
+            <!-- 考勤管理 -->
+            <div class="module-card">
+                <div class="module-header">考勤管理</div>
+                <div class="module-body">
+                    <div class="module-item">· 考勤追踪</div>
+                    <div class="module-item">· 考勤查询</div>
+                    <div class="module-item">· 数据导出</div>
+                    <div class="module-item">· 统计报表</div>
+                </div>
+            </div>
+
+            <!-- 安全监控 -->
+            <div class="module-card">
+                <div class="module-header">安全监控</div>
+                <div class="module-body">
+                    <div class="module-item">· 入侵检测</div>
+                    <div class="module-item">· 未授权告警</div>
+                    <div class="module-item">· 人流统计</div>
+                    <div class="module-item">· 密度分析</div>
+                </div>
+            </div>
+
+            <!-- 系统监控 -->
+            <div class="module-card">
+                <div class="module-header">系统监控</div>
+                <div class="module-body">
+                    <div class="module-item">· 状态监控</div>
+                    <div class="module-item">· 健康检查</div>
+                    <div class="module-item">· 日志管理</div>
+                    <div class="module-item">· 资源监控</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="legend">
+            <h3>模块功能说明</h3>
+            <div class="legend-grid">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+                    <div class="legend-text">
+                        <h4>摄像头管理</h4>
+                        <p>管理RTSP摄像头，支持流有效性验证</p>
+                    </div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></div>
+                    <div class="legend-text">
+                        <h4>用户管理</h4>
+                        <p>管理系统用户，录入人脸特征</p>
+                    </div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"></div>
+                    <div class="legend-text">
+                        <h4>规则管理</h4>
+                        <p>配置监控规则，控制规则状态</p>
+                    </div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);"></div>
+                    <div class="legend-text">
+                        <h4>AI智能分析</h4>
+                        <p>核心AI功能模块，支持目标检测与人脸识别</p>
+                    </div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);"></div>
+                    <div class="legend-text">
+                        <h4>考勤管理</h4>
+                        <p>自动记录人员进出，生成考勤报表</p>
+                    </div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #f857a6 0%, #ff5858 100%);"></div>
+                    <div class="legend-text">
+                        <h4>安全监控</h4>
+                        <p>安全事件检测和告警通知</p>
+                    </div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #4e54c8 0%, #8f94fb 100%);"></div>
+                    <div class="legend-text">
+                        <h4>系统监控</h4>
+                        <p>监控系统运行状态和资源使用</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>A-AI智能视频监控系统 v1.0.7 | 软件需求规格说明书 图3.1</p>
+        </div>
+    </div>
+</body>
+</html>
