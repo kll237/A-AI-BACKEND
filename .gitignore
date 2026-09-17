@@ -73,3 +73,6 @@ logs/
 
 # Debug
 **/debug/
+# 本地配置备份与训练缓存
+data/**/*.backup
+data/**/*.cache
