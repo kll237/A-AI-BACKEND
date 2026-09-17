@@ -1,2 +1,0 @@
-gunny_bag_counting
-gunny_bag_ignore

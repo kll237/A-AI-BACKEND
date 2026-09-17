@@ -38,11 +38,15 @@ env/
 *.log
 backend.log
 
-# Data
-data/unauthorized/images/
-data/unauthorized/generated_content/
-data/unauthorized/recordings/
-data/gunny_bag_dataset/  # Added gunny bag dataset folder
+# Data（运行时/生成数据，不纳入版本控制）
+data/unauthorized/
+data/gunny_bag_dataset/images/
+data/gunny_bag_dataset/labels/
+data_backup_final/
+.env.backup
+# 运行期截图表单（按需保留，避免误提交）
+screenshot_*.jpg
+camera_*_preview.jpg
 
 # Model files (large binary files)
 *.pt
