@@ -64,7 +64,7 @@ class Settings(BaseSettings):
     CAMERA_RTSP_TIMEOUT: int = 10
     CAMERA_BUFFER_SIZE: int = 10
     DEFAULT_FPS: int = 30
-    MAX_CAMERAS: int = 10
+    MAX_CAMERAS: int = 4
     
     # ==================== 后端配置 ====================
     BACKEND_URL: str = "http://localhost:8000"

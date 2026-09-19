@@ -379,6 +379,13 @@ class AttendanceProcessor(BaseProcessor):
                         user_record["entry_similarity"] = float(similarity)
                         
                         logger.info(f"Attendance: {username} entry recorded at {entry_time} (method: {detection_method}, similarity: {similarity:.3f})")
+                        self._log_event(
+                            event_type="attendance_entry",
+                            label=username,
+                            confidence=float(similarity),
+                            frame_path=filename,
+                            payload={"method": detection_method, "similarity": float(similarity), "entry_time": entry_time},
+                        )
                         
                     # Handle exit time
                     elif (in_exit_window or after_exit) and (user_record["entry_time"] is not None):
@@ -397,6 +404,13 @@ class AttendanceProcessor(BaseProcessor):
                         # Add detection method information
                         user_record["exit_detection_method"] = detection_method
                         user_record["exit_similarity"] = float(similarity)
+                        self._log_event(
+                            event_type="attendance_exit",
+                            label=username,
+                            confidence=float(similarity),
+                            frame_path=filename,
+                            payload={"method": detection_method, "similarity": float(similarity), "exit_time": exit_time},
+                        )
                         
                         logger.info(f"Attendance: {username} exit recorded at {exit_time} (method: {detection_method}, similarity: {similarity:.3f})")
                         

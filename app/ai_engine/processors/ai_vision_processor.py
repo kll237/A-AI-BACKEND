@@ -13,7 +13,7 @@ import io
 from PIL import Image
 
 from app.core.config import settings
-from .base_processor import BaseProcessor
+from .base_processor import BaseProcessor, _get_stream_pool
 
 logger = logging.getLogger(__name__)
 
@@ -142,16 +142,11 @@ class OllamaVisionProcessor(BaseProcessor):
         # Update the last process time after successful connection
         self.last_process_time = time.time()
         
-        # Start the processing thread
-        self.processing_thread = threading.Thread(target=self._processing_loop)
-        self.processing_thread.daemon = True
-        self.processing_thread.start()
-        
-        # Start the monitoring thread with a slight delay
-        self.monitoring_thread = threading.Thread(target=self._monitor_connection)
-        self.monitoring_thread.daemon = True
-        self.monitoring_thread.start()
-        
+        # Start the processing + monitoring loops, managed by the shared stream pool
+        pool = _get_stream_pool()
+        self._processing_future = pool.submit(self._processing_loop)
+        self._monitoring_future = pool.submit(self._monitor_connection)
+
         self.is_active = True
         logger.info(f"OllamaVision processor started for camera {self.camera_data.get('name')}")
     
@@ -243,12 +238,22 @@ class OllamaVisionProcessor(BaseProcessor):
         """Stop the processor"""
         self.running = False
         self.is_active = False
-        
+
+        # Reap the pooled tasks that drove this camera's stream
+        for fut in (self._processing_future, self._monitoring_future):
+            if fut is not None:
+                try:
+                    fut.result(timeout=2.0)
+                except Exception:
+                    pass
+        self._processing_future = None
+        self._monitoring_future = None
+
         # Release the camera
         if self.cap is not None:
             self.cap.release()
             self.cap = None
-        
+
         logger.info(f"OllamaVision processor stopped for camera {self.camera_data.get('name')}")
     
     def process_query(self, query: str) -> Dict:

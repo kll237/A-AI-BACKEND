@@ -72,7 +72,7 @@ This AI-powered backend system was developed for the **Andhra Pradesh Government
 ### 📊 **Analytics & Monitoring**
 - **Real-time Processing**: Live video analysis with minimal latency
 - **Performance Metrics**: FPS tracking, detection accuracy, system health
-- **Data Persistence**: JSON-based data storage with structured logging
+- **Data Persistence**: JSON-based data storage with structured logging; every alert event is also written to a local SQLite database (`SQLITE_DB_PATH`, see `app/ai_engine/event_store.py`) for querying and replay
 - **Query Interface**: Natural language queries about camera feeds
 
 ### 🎯 **Specialized Applications**

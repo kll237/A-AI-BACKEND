@@ -12,12 +12,39 @@ import threading
 import queue
 
 import numpy as np
+from concurrent.futures import ThreadPoolExecutor
 
 # Configure logging to suppress FFmpeg errors
 os.environ["OPENCV_FFMPEG_LOGLEVEL"] = "panic"  # Suppress FFmpeg messages
 logging.getLogger("libav").setLevel(logging.ERROR)  # Suppress libav messages
 
 logger = logging.getLogger(__name__)
+
+
+def _get_stream_pool() -> ThreadPoolExecutor:
+    """Lazily create the shared pool that manages every camera stream's
+    processing + monitoring loops. Bounding it to ~2x MAX_CAMERAS keeps
+    multi-stream pulling under a controlled number of OS threads instead of
+    spawning unbounded raw threads per camera.
+
+    Importing settings lazily avoids a module-import cycle with app.core.config.
+    """
+    global _stream_pool
+    if _stream_pool is None:
+        max_workers = 20
+        try:
+            from app.core.config import settings
+            if settings and settings.MAX_CAMERAS:
+                max_workers = settings.MAX_CAMERAS * 2 + 4
+        except Exception:
+            pass
+        _stream_pool = ThreadPoolExecutor(
+            max_workers=max_workers, thread_name_prefix="cam-stream"
+        )
+    return _stream_pool
+
+
+_stream_pool: Optional[ThreadPoolExecutor] = None
 
 class BaseProcessor(ABC):
     """
@@ -49,8 +76,8 @@ class BaseProcessor(ABC):
         self.last_frame = None
         self.process_lock = threading.Lock()
         self.frame_queue = queue.Queue(maxsize=5)  # Reduced buffer from 10 to 5 frames
-        self.processing_thread = None
-        self.monitoring_thread = None
+        self._processing_future = None
+        self._monitoring_future = None
         self.last_error_time = 0  # Track when the last error occurred
         self.error_threshold = 5  # Minimum seconds between error logs
         
@@ -312,36 +339,56 @@ class BaseProcessor(ABC):
             return frame
     
     def start_processing(self):
-        """Start continuous frame processing in a separate thread with monitoring"""
+        """Start continuous frame processing, with the processing and monitoring
+        loops managed by the shared stream thread pool (see _get_stream_pool)."""
         if self.running:
             return
-            
+
         self.running = True
-        self.processing_thread = threading.Thread(target=self._frame_processing_loop)
-        self.processing_thread.daemon = True
-        self.processing_thread.start()
-        
-        # Start connection monitoring thread
-        self.monitoring_thread = threading.Thread(target=self._connection_monitoring_loop)
-        self.monitoring_thread.daemon = True
-        self.monitoring_thread.start()
-        
+        pool = _get_stream_pool()
+        self._processing_future = pool.submit(self._frame_processing_loop)
+        self._monitoring_future = pool.submit(self._connection_monitoring_loop)
+
         logger.info(f"Started continuous processing for camera {self.camera_data.get('name')}")
-    
+
     def stop_processing(self):
-        """Stop continuous frame processing"""
+        """Stop continuous frame processing and reap the pooled tasks"""
         self.running = False
-        if self.processing_thread:
-            self.processing_thread.join(timeout=1.0)
-            self.processing_thread = None
-            
-        if self.monitoring_thread:
-            self.monitoring_thread.join(timeout=1.0)
-            self.monitoring_thread = None
-        
+        for fut in (self._processing_future, self._monitoring_future):
+            if fut is not None:
+                try:
+                    fut.result(timeout=2.0)
+                except Exception:
+                    pass
+        self._processing_future = None
+        self._monitoring_future = None
+
         if self.cap is not None:
             self.cap.release()
             self.cap = None
+
+    def _log_event(self, event_type, label=None, confidence=None, frame_path=None, payload=None):
+        """Best-effort SQLite persistence of an alert event (see
+        app.ai_engine.event_store). Subclasses call this at each alert point so
+        events are queryable/replayable in addition to the frame jpg + JSON."""
+        try:
+            from app.ai_engine.event_store import add_event
+
+            rule_id = None
+            rule_data = getattr(self, "rule_data", None)
+            if isinstance(rule_data, dict):
+                rule_id = rule_data.get("id")
+            add_event(
+                event_type=event_type,
+                camera_id=self.camera_data.get("id"),
+                rule_id=rule_id,
+                label=label,
+                confidence=confidence,
+                frame_path=frame_path,
+                payload=payload,
+            )
+        except Exception:
+            pass
     
     def _connection_monitoring_loop(self):
         """Monitor connection and reconnect if needed"""

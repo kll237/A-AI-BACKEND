@@ -954,6 +954,13 @@ class AuthorizedEntryProcessor(BaseProcessor):
                     # Add to logs and save
                     self.unauthorized_logs.append(unauthorized_log)
                     self._save_unauthorized_logs()
+                    self._log_event(
+                        event_type="unauthorized_entry",
+                        label=unauthorized_log.get("person_id"),
+                        confidence=float(confidence),
+                        frame_path=best_face_path,
+                        payload=unauthorized_log,
+                    )
                     
                     # Update tracker with log time
                     person_tracker["last_logged"] = current_time
